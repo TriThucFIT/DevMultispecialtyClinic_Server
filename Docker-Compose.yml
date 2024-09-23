@@ -1,0 +1,8 @@
+services:
+  activemq:
+    image: rmohr/activemq:latest
+    ports:
+      - 8161:8161
+      - 61616:61616
+      - 61614:61614
+      - 61613:61613
