@@ -8,8 +8,11 @@ import {
   Request,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { Public } from './decorators/public.decorator';
-import { CreateUserDto, SignInDto } from 'src/dto/auth.request.dto';
+import { Public } from '../decorators/public.decorator';
+import { CreateAccountDto, SignInDto } from 'src/dto/auth.request.dto';
+import { Roles } from 'src/decorators/roles.decorator';
+import { Permissions } from 'src/decorators/permissions.decorator';
+import { Action, Resource, RoleName } from 'src/enums/auth.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -22,10 +25,11 @@ export class AuthController {
     return this.authService.signIn(signInDto);
   }
 
-  @Public()
+  @Roles(RoleName.Admin)
+  @Permissions([{ resource: Resource.Account, actions: [Action.Create] }])
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
-  createAccount(@Body() createUserDto: CreateUserDto) {
+  createAccount(@Body() createUserDto: CreateAccountDto) {
     return this.authService.createAccount(createUserDto);
   }
 

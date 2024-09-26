@@ -1,23 +1,17 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToMany,
-  JoinTable,
-} from 'typeorm';
-import { User } from './user.entity';
+import { Entity, Column, ManyToMany, JoinTable } from 'typeorm';
+import { Account } from './account.entity';
 import { Permission } from './permission.entity';
+import { BaseClassProperties } from 'src/common/BaseClassProperties';
+import { RoleName } from 'src/enums/auth.enum';
+import { Expose } from 'class-transformer';
 
 @Entity('roles')
-export class Role {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class Role extends BaseClassProperties {
+  @Column({ unique: true, type: 'enum', enum: RoleName })
+  name: RoleName;
 
-  @Column({ unique: true })
-  name: string;
-
-  @ManyToMany(() => User, (user) => user.roles)
-  users: User[];
+  @ManyToMany(() => Account, (acc) => acc.roles)
+  users: Account[];
 
   @ManyToMany(() => Permission, (permission) => permission.roles)
   @JoinTable({
@@ -26,4 +20,17 @@ export class Role {
     inverseJoinColumn: { name: 'permission_id', referencedColumnName: 'id' },
   })
   permissions: Permission[];
+
+  @Expose()
+  get roleNames() {
+    return this.roleNames.map((role) => role.name);
+  }
+
+  @Expose()
+  get permissionNames() {
+    return this.roleNames
+      .map((role) => role.permissions)
+      .flat()
+      .map((perm) => `${perm.resource}:${perm.action}`);
+  }
 }

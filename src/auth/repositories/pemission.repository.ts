@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Permission } from '../entities/permission.entity';
+import { Action, Resource } from 'src/enums/auth.enum';
 
 @Injectable()
 export class PermissionRepository {
@@ -22,6 +23,12 @@ export class PermissionRepository {
 
   findAll(): Promise<Permission[]> {
     return this.permissionRepository.find();
+  }
+  async findByResourceAndAction(
+    resource: Resource,
+    action: Action,
+  ): Promise<Permission | undefined> {
+    return this.permissionRepository.findOne({ where: { resource, action } });
   }
 
   async remove(id: number): Promise<void> {

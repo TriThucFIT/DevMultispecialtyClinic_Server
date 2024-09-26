@@ -1,11 +1,10 @@
-import { Logger, Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { ActiveMQModule } from './activeMQ/avtiveMQ.module';
 import { AdmissionModule } from './admission/Admisstion.module';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -25,7 +24,6 @@ import { AdmissionModule } from './admission/Admisstion.module';
       dropSchema: Boolean(process.env.DB_DROP),
     }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AuthModule, ActiveMQModule, AdmissionModule],
 })
 export class AppModule {}

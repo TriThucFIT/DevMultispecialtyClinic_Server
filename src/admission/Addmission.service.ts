@@ -6,10 +6,6 @@ import { PatientRegistration } from './Admission.types';
 export class AdmissionService {
   constructor(private readonly activeMqService: ActiveMqService) {}
 
-  async getAdmission() {
-    return 'Admission';
-  }
-
   async createPatientRegistration(patientRegistration: PatientRegistration) {
     const queue = patientRegistration.specialist + '_specialist';
     const sendData = {

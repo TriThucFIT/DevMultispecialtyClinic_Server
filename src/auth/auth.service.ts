@@ -1,42 +1,46 @@
 import {
   Injectable,
-  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserRepository } from './repositories/user.repository';
+import { AccountRepository } from './repositories/account.repository';
 import { RoleRepository } from './repositories/role.repository';
-import { CreateUserDto, SignInDto } from 'src/dto/auth.request.dto';
+import { CreateAccountDto, SignInDto } from 'src/dto/auth.request.dto';
+import { RoleName } from 'src/enums/auth.enum';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private userService: UserRepository,
+    private userService: AccountRepository,
     private roleService: RoleRepository,
     private jwtService: JwtService,
   ) {}
 
   async signIn(signInRequest: SignInDto) {
     const user = await this.userService.findOne(signInRequest.username);
-    Logger.log(user);
-    
-    if (user?.password !== signInRequest.password) {
+    if (!(user && (await user?.comparePassword(signInRequest.password)))) {
       throw new UnauthorizedException();
     }
-    const payload = { username: user.username, sub: user.username };
+
+    const payload = {
+      username: user.username,
+      sub: user.username,
+      roles: user.roleList,
+      permissions: user.permissionList,
+    };
     return {
       access_token: await this.jwtService.signAsync(payload),
     };
   }
 
-  async createAccount(createUserDto: CreateUserDto) {
+  async createAccount(createUserDto: CreateAccountDto) {
     const roles = await this.roleService.findByNamesOrIds(
       createUserDto.roles || [],
     );
     if (!roles.length) {
       const roleEntity = await this.roleService.create({
-        name: 'user',
+        name: RoleName.Guest,
         permissions: [],
       });
       const user = await this.userService.create(createUserDto);
@@ -50,7 +54,7 @@ export class AuthService {
     return user;
   }
 
-  async setRoles(username: string, roles: (string | number)[]) {
+  async setRoles(username: string, roles: (RoleName | number)[]) {
     const roleEntity = await this.roleService.findByNamesOrIds(roles);
     if (!roleEntity.length) {
       throw new NotFoundException('Role not found');
