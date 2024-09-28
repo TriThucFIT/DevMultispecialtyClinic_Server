@@ -1,5 +1,6 @@
 import { BaseClassProperties } from 'src/common/BaseClassProperties';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Patient } from './patient.entity';
 
 @Entity('medical_information')
 export class MedicalInformation extends BaseClassProperties {
@@ -15,4 +16,10 @@ export class MedicalInformation extends BaseClassProperties {
   heartRate: number;
   @Column({ nullable: true })
   temperature: number;
+  @JoinColumn({
+    name: 'patient_id',
+    referencedColumnName: 'id',
+  })
+  @ManyToOne(() => Patient, (patient) => patient.id)
+  patient: Patient;
 }
