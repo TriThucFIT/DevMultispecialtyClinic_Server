@@ -1,4 +1,3 @@
-// auth.guard.ts (đã chỉnh sửa)
 import {
   CanActivate,
   ExecutionContext,
@@ -82,8 +81,6 @@ export class AuthGuard implements CanActivate {
           userPermission.resource === requiredPermission.resource ||
           userPermission.resource === Resource.All,
       );
-
-      console.log('matchingUserPermission', matchingUserPermission);
       if (!matchingUserPermission) return false;
 
       return requiredPermission.actions.some(

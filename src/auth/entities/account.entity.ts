@@ -32,8 +32,6 @@ export class Account extends BaseClassProperties {
       .map((role) => role.permissions)
       .flat()
       .map((perm: Permission) => {
-        console.log('perm', perm);
-
         return {
           resource: perm.resource,
           actions: [perm.action],
