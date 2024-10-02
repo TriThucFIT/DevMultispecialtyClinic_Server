@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Account } from '../entities/account.entity';
-import { CreateAccountDto } from 'src/dto/auth.request.dto';
 import { Role } from '../entities/role.entity';
+import { CreateAccountDto } from '../dto/auth.request.dto';
 
 @Injectable()
 export class AccountRepository {

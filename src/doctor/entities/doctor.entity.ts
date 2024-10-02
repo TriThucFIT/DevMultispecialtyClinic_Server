@@ -9,10 +9,6 @@ export class Doctor extends Employee {
     length: 50,
   })
   specialization: string;
-  @Column({
-    length: 20,
-  })
-  qualification: string;
 
   @OneToMany(() => Appointment, (appointment) => appointment.doctor)
   appointments: Appointment[];

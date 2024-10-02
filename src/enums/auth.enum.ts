@@ -31,6 +31,7 @@ export enum Resource {
   Receptionist = 'RECEPTIONIST',
   Casher = 'CASHER',
   Pharmacist = 'PHARMACIST',
+  addmission = 'ADDMISSION',
 }
 
 export enum Action {

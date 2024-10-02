@@ -5,6 +5,7 @@ import { Invoice } from './entities/invoice.entity';
 import { InvoiceItem } from './entities/invoiceItem.entity';
 import { Casher } from './entities/casher.entity';
 import { PharmacistModule } from 'src/pharmacist/pharmacist.module';
+import { ServiceTypeService } from './services/ServiceType.service';
 
 @Module({
   imports: [
@@ -12,7 +13,15 @@ import { PharmacistModule } from 'src/pharmacist/pharmacist.module';
     TypeOrmModule.forFeature([ServiceType, Invoice, InvoiceItem, Casher]),
   ],
   controllers: [],
-  providers: [ServiceType, Invoice, InvoiceItem, Casher],
-  exports: [],
+  providers: [
+    ServiceType,
+    Invoice,
+    InvoiceItem,
+    Casher,
+    ServiceTypeService,
+  ],
+  exports: [
+    ServiceTypeService,
+  ],
 })
 export class CasherModule {}

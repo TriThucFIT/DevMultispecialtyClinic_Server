@@ -4,19 +4,26 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  InternalServerErrorException,
   Post,
   Request,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from '../decorators/public.decorator';
-import { CreateAccountDto, SignInDto } from 'src/dto/auth.request.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Permissions } from 'src/decorators/permissions.decorator';
 import { Action, Resource, RoleName } from 'src/enums/auth.enum';
+import { CreateAccountDto, SignInDto } from './dto/auth.request.dto';
+import { DoctorService } from 'src/doctor/doctor.service';
+import { ReceptionistService } from 'src/receptionist/receptionist.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private doctorService: DoctorService,
+    private receptionistService: ReceptionistService,
+  ) {}
 
   @Public()
   @HttpCode(HttpStatus.OK)
@@ -30,11 +37,15 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
   createAccount(@Body() createUserDto: CreateAccountDto) {
-    return this.authService.createAccount(createUserDto);
+    try {
+      return this.authService.createAccount(createUserDto);
+    } catch (error) {
+      return new InternalServerErrorException(error);
+    }
   }
 
   @Get('profile')
   getProfile(@Request() req) {
-    return req.user;
+    return this.authService.getProfile(req.user.username);
   }
 }

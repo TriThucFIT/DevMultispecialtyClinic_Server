@@ -6,12 +6,12 @@ import { Appointment } from 'src/appointment/entities/appointment.entity';
 
 @Entity('patient')
 export class Patient extends User {
-  @Column()
-  priority: number;
   @Column({
     type: 'int',
-    nullable: true,
+    nullable: false,
+    default: 3,
   })
+  priority: number;
   age: number;
   @OneToMany(
     () => MedicalInformation,

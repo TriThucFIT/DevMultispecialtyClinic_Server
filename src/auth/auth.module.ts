@@ -13,6 +13,9 @@ import { Permission } from './entities/permission.entity';
 import { AccountRepository } from './repositories/account.repository';
 import { RoleRepository } from './repositories/role.repository';
 import { PermissionRepository } from './repositories/pemission.repository';
+import { DoctorModule } from 'src/doctor/doctor.module';
+import { PatientModule } from 'src/patient/patient.module';
+import { ReceptionistModule } from 'src/receptionist/receptionist.module';
 
 @Module({
   imports: [
@@ -22,7 +25,9 @@ import { PermissionRepository } from './repositories/pemission.repository';
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '600s' },
     }),
-
+    DoctorModule,
+    PatientModule,
+    ReceptionistModule,
     TypeOrmModule.forFeature([Account, Role, Permission]),
   ],
   providers: [

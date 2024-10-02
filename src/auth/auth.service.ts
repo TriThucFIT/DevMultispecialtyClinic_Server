@@ -6,8 +6,11 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { AccountRepository } from './repositories/account.repository';
 import { RoleRepository } from './repositories/role.repository';
-import { CreateAccountDto, SignInDto } from 'src/dto/auth.request.dto';
 import { RoleName } from 'src/enums/auth.enum';
+import { CreateAccountDto, SignInDto } from './dto/auth.request.dto';
+import { UserProfileDTO } from './dto/auth.response.dto';
+import { DoctorService } from 'src/doctor/doctor.service';
+import { ReceptionistService } from 'src/receptionist/receptionist.service';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +18,8 @@ export class AuthService {
     private userService: AccountRepository,
     private roleService: RoleRepository,
     private jwtService: JwtService,
+    private doctorService: DoctorService,
+    private receptionistService: ReceptionistService,
   ) {}
 
   async signIn(signInRequest: SignInDto) {
@@ -35,23 +40,45 @@ export class AuthService {
   }
 
   async createAccount(createUserDto: CreateAccountDto) {
-    const roles = await this.roleService.findByNamesOrIds(
-      createUserDto.roles || [],
-    );
-    if (!roles.length) {
-      const roleEntity = await this.roleService.create({
-        name: RoleName.Guest,
-        permissions: [],
-      });
+    try {
+      const roles = await this.roleService.findByNamesOrIds(
+        createUserDto.roles || [],
+      );
+      if (!roles.length) {
+        const roleEntity = await this.roleService.create({
+          name: RoleName.Guest,
+          permissions: [],
+        });
+        const user = await this.userService.create(createUserDto);
+        this.userService.setRole(user.username, roleEntity);
+        return user;
+      }
       const user = await this.userService.create(createUserDto);
-      this.userService.setRole(user.username, roleEntity);
+      roles.forEach((role) => {
+        this.userService.setRole(user.username, role);
+      });
+
+      switch (createUserDto.department) {
+        case RoleName.Doctor:
+          await this.doctorService.create({
+            ...createUserDto.entity,
+            account: user,
+          });
+          break;
+        case RoleName.Receptionist:
+          await this.receptionistService.create({
+            ...createUserDto.entity,
+            account: user,
+          });
+          break;
+        default:
+          break;
+      }
+
       return user;
+    } catch (error) {
+      throw new Error(error);
     }
-    const user = await this.userService.create(createUserDto);
-    roles.forEach((role) => {
-      this.userService.setRole(user.username, role);
-    });
-    return user;
   }
 
   async setRoles(username: string, roles: (RoleName | number)[]) {
@@ -63,5 +90,51 @@ export class AuthService {
       this.userService.setRole(username, role);
     });
     return this.userService.findOne(username);
+  }
+
+  async getProfile(username: string): Promise<UserProfileDTO> {
+    const account = await this.userService.findOne(username);
+    if (!account) {
+      throw new NotFoundException({
+        message: 'Account not found',
+      });
+    }
+    const accountResponse = {
+      ...account,
+      roles: account.roles.map((role) => ({
+        ...role,
+        permissions: role.permissions.map((permission) => ({
+          ...permission,
+          action: [permission.action],
+        })),
+      })),
+    };
+    switch (account.roleList[0]) {
+      case RoleName.Admin:
+        return UserProfileDTO.plainToInstance(accountResponse);
+      case RoleName.Doctor:
+        const doctor = await this.doctorService.findByAccount(account.id);
+        console.log(account);
+
+        return UserProfileDTO.plainToInstance({
+          ...accountResponse,
+          ...doctor,
+        });
+      case RoleName.Receptionist:
+        const receptionist = await this.receptionistService.findByAccount(
+          account.id,
+        );
+
+        console.log(receptionist);
+
+        console.log(account);
+
+        return UserProfileDTO.plainToInstance({
+          ...accountResponse,
+          ...receptionist,
+        });
+      default:
+        return UserProfileDTO.plainToInstance(accountResponse);
+    }
   }
 }

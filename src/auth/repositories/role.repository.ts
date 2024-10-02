@@ -3,9 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from '../entities/role.entity';
 import { In, Repository } from 'typeorm';
-import { CreateRoleDto } from 'src/dto/auth.request.dto';
 import { Permission } from '../entities/permission.entity';
 import { RoleName } from 'src/enums/auth.enum';
+import { CreateRoleDto } from '../dto/auth.request.dto';
 
    
 @Injectable()

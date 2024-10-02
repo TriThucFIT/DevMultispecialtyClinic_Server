@@ -32,7 +32,9 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(
+        'Không tìm thấy token, Vui lòng đăng nhập',
+      );
     }
     try {
       const payload = await this.jwtService.verifyAsync(token, {
@@ -46,7 +48,7 @@ export class AuthGuard implements CanActivate {
         requiredPermissions &&
         !this.hasPermissions(payload, requiredPermissions)
       ) {
-        throw new UnauthorizedException('Insufficient permissions');
+        throw new UnauthorizedException('Không đủ quyền truy cập');
       }
 
       const requiredRoles = this.reflector.getAllAndOverride<string[]>(
@@ -54,7 +56,7 @@ export class AuthGuard implements CanActivate {
         [context.getHandler(), context.getClass()],
       );
       if (requiredRoles && !this.hasRoles(payload, requiredRoles)) {
-        throw new UnauthorizedException('Insufficient roles');
+        throw new UnauthorizedException('Không đủ quyền truy cập');
       }
 
       request['user'] = payload;

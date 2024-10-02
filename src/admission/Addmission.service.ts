@@ -21,6 +21,8 @@ export class AdmissionService {
     this.activeMqService.sendMessage(queue, JSON.stringify(sendData));
   }
 
+  
+
   private calculatePriority(patient: PatientRegistration): number {
     if (patient.seviceType === 'EMERGENCY') {
       return 0;
