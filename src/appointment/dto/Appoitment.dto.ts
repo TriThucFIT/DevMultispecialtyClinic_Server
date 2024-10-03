@@ -1,6 +1,5 @@
 import { Type } from 'class-transformer';
 import { IsString, Matches, ValidateNested } from 'class-validator';
-import { ServiceType } from 'src/casher/entities/ServiceType.entity';
 import { DoctorAppointmentDto } from 'src/doctor/dto/doctor.dto';
 import { PatientCreationDto } from 'src/patient/dto/patient.dto';
 

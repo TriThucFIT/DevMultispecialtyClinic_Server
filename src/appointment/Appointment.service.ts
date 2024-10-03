@@ -1,5 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { AppointmentRepository } from './repositories/appointment.repository';
+import { Injectable } from '@nestjs/common';
 import { CreateAppointmentDto } from './dto/Appoitment.dto';
 import { Appointment } from './entities/appointment.entity';
 import { DoctorService } from 'src/doctor/doctor.service';
@@ -43,7 +42,6 @@ export class AppointmentService {
       );
 
       if (doctor) {
-        console.log('Doctor found', doctor);
         apm.doctor = doctor;
       } else {
         throw new Error('Doctor not found');
