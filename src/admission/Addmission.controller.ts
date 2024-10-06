@@ -1,12 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { Public } from 'src/decorators/public.decorator';
-import { PatientRegistration } from './Admission.types';
+import { Body, Controller, Post } from '@nestjs/common';
 import { AdmissionService } from './Addmission.service';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Action, Resource, RoleName } from 'src/enums/auth.enum';
 import { Permissions } from 'src/decorators/permissions.decorator';
+import { CreateAppointmentDto } from 'src/appointment/dto/Appoitment.dto';
+import { CreateAdmissionDto } from './dto/Admission.dto';
 
-@Controller('addmission')
+@Controller('admission')
 export class AdmissionController {
   constructor(private readonly admissionService: AdmissionService) {}
   @Roles(RoleName.Receptionist)
@@ -17,7 +17,7 @@ export class AdmissionController {
     },
   ])
   @Post('patient-registration')
-  async patientRegistration(@Body() patientRegistration: PatientRegistration) {
-    return this.admissionService.createPatientRegistration(patientRegistration);
+  async patientRegistration(@Body() createAdmissionDto: CreateAdmissionDto) {
+    return this.admissionService.createPatientRegistration(createAdmissionDto);
   }
 }

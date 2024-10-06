@@ -12,7 +12,11 @@ export class DoctorService {
   ) {}
 
   async findAll() {
-    return this.doctorRepository.find();
+    return this.doctorRepository.find({
+      where: {
+        isActive: true,
+      },
+    });
   }
 
   async findOne(id: number) {
@@ -27,6 +31,25 @@ export class DoctorService {
         },
       },
     });
+  }
+
+  async findBySpecialization(specialization: string) {
+    return this.doctorRepository.find({
+      where: { specialization: specialization },
+    });
+  }
+
+  async findAllSpecializations() {
+    const doctors = await this.doctorRepository.find({
+      select: ['specialization'],
+      where: { isActive: true },
+    });
+
+    const specializations = [
+      ...new Set(doctors.map((doctor) => doctor.specialization)),
+    ];
+
+    return specializations;
   }
 
   async findByNameAndSpecialty(name: string, specialty: string) {

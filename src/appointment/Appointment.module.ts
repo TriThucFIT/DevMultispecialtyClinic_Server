@@ -14,7 +14,6 @@ import { CasherModule } from 'src/casher/casher.module';
     TypeOrmModule.forFeature([Appointment]),
     DoctorModule,
     PatientModule,
-    AdmissionModule,
     CasherModule,
   ],
   providers: [AppointmentService, AppointmentRepository],

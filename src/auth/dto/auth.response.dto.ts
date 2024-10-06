@@ -24,6 +24,8 @@ export class UserProfileDTO extends BaseDTO {
     specialization?: string;
   };
   @Expose()
+  specialization?: string;
+  @Expose()
   @Type(() => RoleResponseDto)
   roles?: RoleResponseDto[];
 }

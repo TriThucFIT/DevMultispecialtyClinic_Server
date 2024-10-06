@@ -27,7 +27,6 @@ export class AuthService {
     if (!(user && (await user?.comparePassword(signInRequest.password)))) {
       throw new UnauthorizedException();
     }
-
     const payload = {
       username: user.username,
       sub: user.username,
@@ -35,7 +34,9 @@ export class AuthService {
       permissions: user.permissionList,
     };
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      access_token: await this.jwtService.signAsync(payload, {
+        expiresIn: '1d',
+      }),
     };
   }
 
@@ -114,8 +115,6 @@ export class AuthService {
         return UserProfileDTO.plainToInstance(accountResponse);
       case RoleName.Doctor:
         const doctor = await this.doctorService.findByAccount(account.id);
-        console.log(account);
-
         return UserProfileDTO.plainToInstance({
           ...accountResponse,
           ...doctor,
@@ -124,11 +123,6 @@ export class AuthService {
         const receptionist = await this.receptionistService.findByAccount(
           account.id,
         );
-
-        console.log(receptionist);
-
-        console.log(account);
-
         return UserProfileDTO.plainToInstance({
           ...accountResponse,
           ...receptionist,

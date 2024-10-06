@@ -12,3 +12,4 @@ export type PatientRegistration = {
   specialist: string;
   symptoms: string;
 };
+

@@ -29,6 +29,10 @@ export class ReceptionistService {
     });
   }
 
+  async findByPhone(phone: string): Promise<Receptionist> {
+    return this.receptionistRepository.findOne({ where: { phone } });
+  }
+
   async create(
     createReceptionistDto: ReceptionistCreationDto,
   ): Promise<Receptionist> {

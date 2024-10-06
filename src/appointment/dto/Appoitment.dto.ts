@@ -4,6 +4,8 @@ import { DoctorAppointmentDto } from 'src/doctor/dto/doctor.dto';
 import { PatientCreationDto } from 'src/patient/dto/patient.dto';
 
 export class CreateAppointmentDto {
+  status?: string;
+  isWalkIn?: boolean;
   service: string;
   doctor?: DoctorAppointmentDto;
   date: Date;
