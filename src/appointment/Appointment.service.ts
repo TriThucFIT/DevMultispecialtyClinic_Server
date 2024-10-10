@@ -58,8 +58,9 @@ export class AppointmentService {
         throw new Error('Service type not found');
       }
     }
-    const patient = await this.patientService.findByPhone(
+    const patient = await this.patientService.findByPhoneAndName(
       appointment.patient.phone,
+      appointment.patient.fullName,
     );
     if (patient) {
       apm.patient = patient;

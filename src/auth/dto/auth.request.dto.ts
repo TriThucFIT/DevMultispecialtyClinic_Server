@@ -16,11 +16,18 @@ export class SignInDto {
   password: string;
 }
 
-export class CreateAccountDto {
+export class CreateBlankAccountDto {
   @IsNotEmpty()
   @Length(4, 50)
   readonly username: string;
   @IsNotEmpty()
+  readonly password: string;
+}
+
+export class CreateAccountDto {
+  @IsNotEmpty()
+  @Length(4, 50)
+  readonly username: string;
   @IsEmail()
   readonly email: string;
   @IsNotEmpty()

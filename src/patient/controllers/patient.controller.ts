@@ -1,34 +1,41 @@
-import { Controller, Get, Logger, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Logger,
+  NotFoundException,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { PatientService } from '../patient.service';
-import { IsPhoneNumber } from 'class-validator';
+import { Public } from 'src/decorators/public.decorator';
+import { PatientResponseDto } from '../dto/patient.dto';
 
 @Controller('patient')
 export class PatientController {
   constructor(private service: PatientService) {}
 
   @Get()
-  async findAll() {
-    return this.service.findAll();
+  @Public()
+  async findAll(
+    @Query('phone') phone: string,
+    @Query('fullName') fullName: string,
+  ) {
+    if (phone && fullName) {
+      return this.service.findByPhoneAndName(phone, fullName);
+    }
+    if (phone) {
+      return this.service.findByPhone(phone);
+    }
+    if (fullName) {
+      return this.service.findByFullName(fullName);
+    }
+    return (await this.service.findAll()).map((patient) =>
+      PatientResponseDto.plainToInstance(patient),
+    );
   }
 
   @Get(':id')
   async findOne(id: number) {
     return this.service.findOne(id);
-  }
-
-  @Get('phone/:phone')
-  async findByPhone(@Param('phone') phone: string) {
-    try {
-      const patient = await this.service.findByPhone(phone);
-      return patient
-        ? patient
-        : {
-            message: 'Patient not found',
-            message_VN: 'Không tìm thấy bệnh nhân',
-          };
-    } catch (error) {
-      Logger.error(error);
-      return { error: error.message };
-    }
   }
 }

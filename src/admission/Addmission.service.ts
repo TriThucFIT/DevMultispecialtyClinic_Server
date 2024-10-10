@@ -33,8 +33,9 @@ export class AdmissionService {
   async createPatientRegistration(createAdmissionDto: CreateAdmissionDto) {
     let patient: Patient;
     if (createAdmissionDto.patient) {
-      patient = await this.patientService.findByPhone(
+      patient = await this.patientService.findByPhoneAndName(
         createAdmissionDto.patient.phone,
+        createAdmissionDto.patient.fullName,
       );
     }
     if (!patient) {

@@ -7,7 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AccountRepository } from './repositories/account.repository';
 import { RoleRepository } from './repositories/role.repository';
 import { RoleName } from 'src/enums/auth.enum';
-import { CreateAccountDto, SignInDto } from './dto/auth.request.dto';
+import { CreateAccountDto, CreateBlankAccountDto, SignInDto } from './dto/auth.request.dto';
 import { UserProfileDTO } from './dto/auth.response.dto';
 import { DoctorService } from 'src/doctor/doctor.service';
 import { ReceptionistService } from 'src/receptionist/receptionist.service';
@@ -39,6 +39,8 @@ export class AuthService {
       }),
     };
   }
+
+  async createBlankAccount(createUserDto: CreateBlankAccountDto) {}
 
   async createAccount(createUserDto: CreateAccountDto) {
     try {

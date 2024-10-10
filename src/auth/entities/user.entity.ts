@@ -14,7 +14,6 @@ export class User extends BaseClassProperties {
   address: string;
   @Column({
     length: 50,
-    unique: true,
   })
   phone: string;
   @Column()
