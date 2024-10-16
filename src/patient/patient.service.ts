@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PatientCreationDto, PatientResponseDto } from './dto/patient.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Patient } from './entities/patient.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
+import { log } from 'console';
 
 @Injectable()
 export class PatientService {
@@ -23,11 +24,22 @@ export class PatientService {
   }
 
   async findByPhone(phone: string): Promise<PatientResponseDto[]> {
-    const patients = await this.patientRepository.find({ where: { phone } });
+    const patients = await this.patientRepository.find({
+      where: { phone: Like(`%${phone}%`) },
+      relations: ['account'],
+    });
     if (patients && patients.length > 0) {
-      return patients.map((patient) =>
-        PatientResponseDto.plainToInstance(patient),
-      );
+      return patients.map((patient) => {
+        let account = patient.account;
+        let patientWithMail = null;
+        if (account) {
+          patientWithMail = {
+            ...patient,
+            email: account.email,
+          };
+        }
+        return PatientResponseDto.plainToInstance(patientWithMail || patient);
+      });
     } else {
       throw new NotFoundException({
         message: 'Patient not found',

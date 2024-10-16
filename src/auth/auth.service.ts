@@ -7,7 +7,11 @@ import { JwtService } from '@nestjs/jwt';
 import { AccountRepository } from './repositories/account.repository';
 import { RoleRepository } from './repositories/role.repository';
 import { RoleName } from 'src/enums/auth.enum';
-import { CreateAccountDto, CreateBlankAccountDto, SignInDto } from './dto/auth.request.dto';
+import {
+  CreateAccountDto,
+  CreateBlankAccountDto,
+  SignInDto,
+} from './dto/auth.request.dto';
 import { UserProfileDTO } from './dto/auth.response.dto';
 import { DoctorService } from 'src/doctor/doctor.service';
 import { ReceptionistService } from 'src/receptionist/receptionist.service';
@@ -44,6 +48,9 @@ export class AuthService {
 
   async createAccount(createUserDto: CreateAccountDto) {
     try {
+      if (!createUserDto.department) {
+        throw new Error('Department is required');
+      }
       const roles = await this.roleService.findByNamesOrIds(
         createUserDto.roles || [],
       );
@@ -77,7 +84,6 @@ export class AuthService {
         default:
           break;
       }
-
       return user;
     } catch (error) {
       throw new Error(error);
@@ -120,6 +126,7 @@ export class AuthService {
         return UserProfileDTO.plainToInstance({
           ...accountResponse,
           ...doctor,
+          specialization: doctor.specialization.toString(),
         });
       case RoleName.Receptionist:
         const receptionist = await this.receptionistService.findByAccount(

@@ -10,6 +10,7 @@ import {
 import { CreateAppointmentDto } from './dto/Appoitment.dto';
 import { AppointmentService } from './Appointment.service';
 import { Public } from 'src/decorators/public.decorator';
+import { log } from 'console';
 
 @Controller('appointment')
 export class AppointmentController {

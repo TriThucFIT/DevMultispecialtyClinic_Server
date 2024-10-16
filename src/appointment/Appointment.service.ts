@@ -6,6 +6,7 @@ import { ServiceTypeService } from 'src/casher/services/ServiceType.service';
 import { PatientService } from 'src/patient/patient.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { log } from 'console';
 
 @Injectable()
 export class AppointmentService {
@@ -58,13 +59,20 @@ export class AppointmentService {
         throw new Error('Service type not found');
       }
     }
-    const patient = await this.patientService.findByPhoneAndName(
-      appointment.patient.phone,
-      appointment.patient.fullName,
-    );
-    if (patient) {
-      apm.patient = patient;
-    } else {
+    try {
+      const patient = await this.patientService.findByPhoneAndName(
+        appointment.patient.phone,
+        appointment.patient.fullName,
+      );
+      if (patient) {
+        apm.patient = patient;
+      } else {
+        const newPatient = await this.patientService.create(
+          appointment.patient,
+        );
+        apm.patient = newPatient;
+      }
+    } catch (error) {
       const newPatient = await this.patientService.create(appointment.patient);
       apm.patient = newPatient;
     }

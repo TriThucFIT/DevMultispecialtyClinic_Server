@@ -1,5 +1,4 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import { AccountRepository } from './auth/repositories/account.repository';
 import { RoleRepository } from './auth/repositories/role.repository';
 import { PermissionRepository } from './auth/repositories/pemission.repository';
@@ -7,8 +6,12 @@ import { Permission } from './auth/entities/permission.entity';
 import { RoleName, Resource, Action } from './enums/auth.enum';
 import { ServiceTypeService } from './casher/services/ServiceType.service';
 import { ServiceType } from './casher/entities/ServiceType.entity';
-import { DoctorCreationDto } from './doctor/dto/doctor.dto';
+import {
+  DoctorCreationDto,
+  SpecializationCreationDTO,
+} from './doctor/dto/doctor.dto';
 import { DoctorService } from './doctor/doctor.service';
+import { Doctor } from './doctor/entities/doctor.entity';
 
 @Injectable()
 export class AppService implements OnModuleInit {
@@ -126,23 +129,43 @@ export class AppService implements OnModuleInit {
 
   createDefaultData = async () => {
     const serviceTypes = [
-      'Normal Consultation',
-      'Special Consultation',
-      'Overtime Consultation',
+      'InHour',
+      'OutHour',
+      'Emergency',
     ];
 
     const specializations = [
-      'Cardiology', // Tim mạch
-      'Dermatology', // Da liễu
-      'Gastroenterology', // Tiêu hóa
-      'Neurology', // Thần kinh
-      'Orthopedics', // Chỉnh hình
-      'Pediatrics', // Nhi khoa
-      'Psychiatry', // Tâm thần
-      'Radiology', // Chẩn đoán hình ảnh
-      'Surgery', // Phẫu thuật
-      'Urology', // Tiết niệu
+      'Cardiology',
+      'Dermatology',
+      'Gastroenterology',
+      'Neurology',
+      'Orthopedics',
+      'Pediatrics',
+      'Psychiatry',
+      'Radiology',
+      'Surgery',
+      'Urology',
     ];
+    const vietnameseNames = [
+      'Tim mạch',
+      'Da liễu',
+      'Tiêu hóa',
+      'Thần kinh',
+      'Chỉnh hình',
+      'Nhi khoa',
+      'Tâm thần',
+      'Chẩn đoán hình ảnh',
+      'Phẫu thuật',
+      'Tiết niệu',
+    ];
+
+    const specializationObjects: SpecializationCreationDTO[] =
+      specializations.map((specialization, index) => ({
+        specialization_id: specialization,
+        name: vietnameseNames[index],
+      }));
+
+    await this.doctorService.createManySpecializations(specializationObjects);
 
     for (const serviceType of serviceTypes) {
       const service = await this.serviceTypeService.findByName(serviceType);
@@ -160,36 +183,34 @@ export class AppService implements OnModuleInit {
       }
     }
 
-    const doctors: DoctorCreationDto[] = [];
+    const doctors: Doctor[] = [];
 
-    specializations.forEach((specialization, index) => {
-      const doctor1: DoctorCreationDto = {
-        employeeId: `DOC01${index * 2 + 1}`,
-        fullName: `Nguyễn Văn ${index * 2 + 1}`,
-        specialization,
-        dob: new Date('1976-01-01'),
-        email: `nguyenvan${index * 2 + 1}@hospital.com`,
-        phone: `095643567${index * 2 + 1}`,
-        gender: false,
-        address: '123 Quang Trung, Quận Gò Vấp, TP.HCM',
-      };
+    await Promise.all(
+      specializations.map(async (specialization, index) => {
+        const spec =
+          await this.doctorService.findSpecialization(specialization);
 
-      const doctor2: DoctorCreationDto = {
-        employeeId: `DOC02${index * 2 + 1}`,
-        fullName: `Trần Thị ${index * 2 + 2}`,
-        specialization,
-        dob: new Date('1976-01-01'),
-        email: `tranthi${index * 2 + 2}@hospital.com`,
-        phone: `095643545${index * 2 + 2}`,
-        gender: true,
-        address: '123 Quang Trung, Quận Gò Vấp, TP.HCM',
-      };
+        const doctor1 = new Doctor();
+        doctor1.employeeId = `DOC01${index * 2 + 1}`;
+        doctor1.fullName = `Nguyễn Văn ${index * 2 + 1}`;
+        doctor1.specialization = spec;
+        doctor1.dob = new Date('1976-01-01');
+        doctor1.phone = `095643567${index * 2 + 1}`;
+        doctor1.gender = false;
+        doctor1.address = '123 Quang Trung, Quận Gò Vấp, TP.HCM';
 
-      doctors.push(doctor1, doctor2);
-    });
+        const doctor2 = new Doctor();
+        doctor2.employeeId = `DOC02${index * 2 + 1}`;
+        doctor2.fullName = `Trần Thị ${index * 2 + 2}`;
+        doctor2.specialization = spec;
+        doctor2.dob = new Date('1976-01-01');
+        doctor2.phone = `095643545${index * 2 + 2}`;
+        doctor2.gender = true;
+        doctor2.address = '123 Quang Trung, Quận Gò Vấp, TP.HCM';
+        doctors.push(doctor1, doctor2);
+      }),
+    );
 
-    for (const doctor of doctors) {
-      await this.doctorService.create(doctor);
-    }
+    await this.doctorService.createMany(doctors);
   };
 }

@@ -14,6 +14,7 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { Permissions } from 'src/decorators/permissions.decorator';
 import { Action, Resource, RoleName } from 'src/enums/auth.enum';
 import { CreateAccountDto, SignInDto } from './dto/auth.request.dto';
+import { log } from 'console';
 
 @Controller('auth')
 export class AuthController {
@@ -28,13 +29,17 @@ export class AuthController {
 
   @Roles(RoleName.Admin)
   @Permissions([{ resource: Resource.Account, actions: [Action.Create] }])
-  @HttpCode(HttpStatus.CREATED)
   @Post('register')
-  createAccount(@Body() createUserDto: CreateAccountDto) {
+  async createAccount(@Body() createUserDto: CreateAccountDto) {
     try {
-      return this.authService.createAccount(createUserDto);
+      const account = await this.authService.createAccount(createUserDto);
+      return {
+        message: 'Account created successfully',
+        data: account,
+      };
     } catch (error) {
-      return new InternalServerErrorException(error);
+      log('error', error);
+      throw new InternalServerErrorException(error.message);
     }
   }
 
