@@ -25,11 +25,14 @@ export class DoctorService {
   }
 
   async findOne(id: number) {
-    return this.doctorRepository.findOne({ where: { id } });
+    return this.doctorRepository.findOne({
+      where: { id },
+      relations: ['specialization'],
+    });
   }
 
   async findByAccount(accountId: number) {
-    return this.doctorRepository.findOne({
+    const doctor = await this.doctorRepository.findOne({
       where: {
         account: {
           id: accountId,
@@ -37,6 +40,7 @@ export class DoctorService {
       },
       relations: ['specialization'],
     });
+    return doctor;
   }
 
   async findBySpecialization(specialization_id: string) {

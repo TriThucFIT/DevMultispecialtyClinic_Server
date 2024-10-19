@@ -3,7 +3,6 @@ import { ServiceType } from 'src/casher/entities/ServiceType.entity';
 import { BaseClassProperties } from 'src/common/BaseClassProperties';
 import { Doctor } from 'src/doctor/entities/doctor.entity';
 import { Patient } from 'src/patient/entities/patient.entity';
-import { Receptionist } from 'src/receptionist/entities/receptionist.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { AppointmentStatus } from '../enums/AppointmentStatus.enum';
 
@@ -18,13 +17,19 @@ export class Appointment extends BaseClassProperties {
   @Column({ type: 'time', nullable: true })
   checkInTime: Date | null;
 
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
+  isWalkIn: boolean;
+
   @Column('enum', {
     enum: AppointmentStatus,
     default: AppointmentStatus.SCHEDULED,
   })
   status: AppointmentStatus;
 
-  @Column({ type: 'text', nullable: true})
+  @Column({ type: 'text', nullable: true })
   symptoms: string;
 
   @ManyToOne(() => Doctor, (doctor) => doctor.appointments)

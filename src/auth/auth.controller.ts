@@ -44,7 +44,7 @@ export class AuthController {
   }
 
   @Get('profile')
-  getProfile(@Request() req) {
+  getProfile(@Request() req : any) {
     return this.authService.getProfile(req.user.username);
   }
 }

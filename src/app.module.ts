@@ -12,6 +12,7 @@ import { AppointmentModule } from './appointment/Appointment.module';
 import { DoctorModule } from './doctor/doctor.module';
 import { LabTestModule } from './labTest/labTest.module';
 import { PharmacistModule } from './pharmacist/pharmacist.module';
+import { dataSourceOptions } from './database/data-source';
 
 @Module({
   imports: [
@@ -27,17 +28,7 @@ import { PharmacistModule } from './pharmacist/pharmacist.module';
     ReceptionistModule,
 
     ConfigModule.forRoot(),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT),
-      username: process.env.DB_USER,
-      password: process.env.DB_PASS,
-      database: process.env.DB_NAME,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: false,
-      dropSchema: false,
-    }),
+    TypeOrmModule.forRoot(dataSourceOptions),
   ],
   providers: [AppService, AuthModule, ActiveMQModule, AdmissionModule],
 })

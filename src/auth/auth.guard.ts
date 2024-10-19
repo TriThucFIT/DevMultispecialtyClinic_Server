@@ -2,6 +2,7 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -11,7 +12,8 @@ import { jwtConstants } from './auth.constants';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
 import { ROLES_KEY } from '../decorators/roles.decorator';
-import { Action, Resource } from 'src/enums/auth.enum';
+import { Action, Resource, RoleName } from 'src/enums/auth.enum';
+import { log } from 'console';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -41,6 +43,14 @@ export class AuthGuard implements CanActivate {
         secret: jwtConstants.secret,
       });
 
+      const requiredRoles = this.reflector.getAllAndOverride<string[]>(
+        ROLES_KEY,
+        [context.getHandler(), context.getClass()],
+      );
+      if (requiredRoles && !this.hasRoles(payload, requiredRoles)) {
+        throw new UnauthorizedException('Không có quyền truy cập');
+      }
+
       const requiredPermissions = this.reflector.getAllAndOverride<
         { resource: Resource; actions: Action[] }[]
       >(PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);
@@ -48,14 +58,6 @@ export class AuthGuard implements CanActivate {
         requiredPermissions &&
         !this.hasPermissions(payload, requiredPermissions)
       ) {
-        throw new UnauthorizedException('Không đủ quyền truy cập');
-      }
-
-      const requiredRoles = this.reflector.getAllAndOverride<string[]>(
-        ROLES_KEY,
-        [context.getHandler(), context.getClass()],
-      );
-      if (requiredRoles && !this.hasRoles(payload, requiredRoles)) {
         throw new UnauthorizedException('Không đủ quyền truy cập');
       }
 
@@ -77,23 +79,42 @@ export class AuthGuard implements CanActivate {
   ): boolean {
     const userPermissions = payload.permissions || [];
 
-    return requiredPermissions.every((requiredPermission) => {
-      const matchingUserPermission = userPermissions.find(
-        (userPermission) =>
-          userPermission.resource === requiredPermission.resource ||
-          userPermission.resource === Resource.All,
-      );
-      if (!matchingUserPermission) return false;
+    const permissionsMap = userPermissions.reduce(
+      (acc, permission) => {
+        if (!acc[permission.resource]) {
+          acc[permission.resource] = new Set(permission.actions);
+        } else {
+          permission.actions.forEach((action) =>
+            acc[permission.resource].add(action),
+          );
+        }
+        return acc;
+      },
+      {} as Record<Resource, Set<Action>>,
+    );
+    if (
+      permissionsMap[Resource.All] &&
+      permissionsMap[Resource.All].has(Action.All)
+    ) {
+      return true;
+    }
 
-      return requiredPermission.actions.some(
+    return requiredPermissions.every((requiredPermission) => {
+      const userActions =
+        permissionsMap[requiredPermission.resource] || new Set<Action>();
+
+      return requiredPermission.actions.every(
         (requiredAction) =>
-          matchingUserPermission.actions.includes(requiredAction) ||
-          matchingUserPermission.actions.includes(Action.All),
+          userActions.has(requiredAction) || userActions.has(Action.All),
       );
     });
   }
+
   private hasRoles(payload: any, requiredRoles: string[]): boolean {
     const userRoles = payload.roles || [];
-    return requiredRoles.some((role) => userRoles.includes(role));
+    return (
+      userRoles.includes(RoleName.Admin) ||
+      requiredRoles.some((role) => userRoles.includes(role))
+    );
   }
 }

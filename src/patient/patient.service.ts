@@ -2,8 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PatientCreationDto, PatientResponseDto } from './dto/patient.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Patient } from './entities/patient.entity';
-import { Like, Repository } from 'typeorm';
-import { log } from 'console';
+import { Like, Or, Repository } from 'typeorm';
 
 @Injectable()
 export class PatientService {
@@ -12,8 +11,28 @@ export class PatientService {
     private patientRepository: Repository<Patient>,
   ) {}
 
-  async findAll(): Promise<PatientResponseDto[]> {
-    const patients = await this.patientRepository.find();
+  async findAll(
+    phone?: string,
+    fullName?: string,
+    email?: string,
+    id?: number,
+  ): Promise<PatientResponseDto[]> {
+    const queryClause = id
+      ? { id }
+      : phone
+        ? { phone: Like(`%${phone}%`) }
+        : fullName
+          ? { fullName: Like(`%${fullName}%`) }
+          : { email };
+    const patients = await this.patientRepository.find(
+      queryClause
+        ? {
+            where: email
+              ? { account: { email: Like(`%${email}%`) } }
+              : queryClause,
+          }
+        : {},
+    );
     return patients.map((patient) =>
       PatientResponseDto.plainToInstance(patient),
     );
@@ -47,17 +66,19 @@ export class PatientService {
       });
     }
   }
-  async findByFullName(fullName: string): Promise<PatientResponseDto> {
-    const patient = await this.patientRepository.findOne({
-      where: { fullName },
+  async findByFullName(fullName: string): Promise<PatientResponseDto[]> {
+    const patients = await this.patientRepository.find({
+      where: { fullName: Like(`%${fullName}%`) },
     });
-    if (!patient) {
+    if (!patients || patients.length === 0) {
       throw new NotFoundException({
         message: 'Patient not found',
         message_VN: 'Không tìm thấy bệnh nhân',
       });
     }
-    return PatientResponseDto.plainToInstance(patient);
+    return patients.map((patient) =>
+      PatientResponseDto.plainToInstance(patient),
+    );
   }
 
   async findByPhoneAndName(phone: string, fullName: string): Promise<Patient> {

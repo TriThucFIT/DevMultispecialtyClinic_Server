@@ -19,12 +19,14 @@ export class ReceptionistService {
     return this.receptionistRepository.findOne({ where: { id } });
   }
 
-  async findByAccount(accountId: number): Promise<Receptionist> {
+  async findByAccount(
+    accountId?: number,
+    username?: string,
+  ): Promise<Receptionist> {
+    const queryClause = accountId ? { id: accountId } : { username };
     return this.receptionistRepository.findOne({
       where: {
-        account: {
-          id: accountId,
-        },
+        account: queryClause,
       },
     });
   }

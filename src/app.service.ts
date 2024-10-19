@@ -6,12 +6,10 @@ import { Permission } from './auth/entities/permission.entity';
 import { RoleName, Resource, Action } from './enums/auth.enum';
 import { ServiceTypeService } from './casher/services/ServiceType.service';
 import { ServiceType } from './casher/entities/ServiceType.entity';
-import {
-  DoctorCreationDto,
-  SpecializationCreationDTO,
-} from './doctor/dto/doctor.dto';
+import { SpecializationCreationDTO } from './doctor/dto/doctor.dto';
 import { DoctorService } from './doctor/doctor.service';
 import { Doctor } from './doctor/entities/doctor.entity';
+import { Address } from './auth/entities/Address..type';
 
 @Injectable()
 export class AppService implements OnModuleInit {
@@ -107,19 +105,7 @@ export class AppService implements OnModuleInit {
         password: process.env.ADMIN_PASS || 'adminPassword',
         roles: [adminRole],
       });
-      this.accountRepository.create({
-        username: 'doctor',
-        email: 'doctor@gmail.com',
-        password: 'doctorPassword',
-        roles: [doctorRole],
-      });
 
-      this.accountRepository.create({
-        username: 'receptionist',
-        email: '',
-        password: 'receptionistPassword',
-        roles: [receptionistRole],
-      });
       Logger.log('Admin account created');
       await this.createDefaultData();
     } else {
@@ -128,11 +114,7 @@ export class AppService implements OnModuleInit {
   };
 
   createDefaultData = async () => {
-    const serviceTypes = [
-      'InHour',
-      'OutHour',
-      'Emergency',
-    ];
+    const serviceTypes = ['InHour', 'OutHour', 'Emergency'];
 
     const specializations = [
       'Cardiology',
@@ -174,11 +156,11 @@ export class AppService implements OnModuleInit {
         service.name = serviceType;
         service.price = 0;
         service.description =
-          serviceType === 'Normal Consultation'
+          serviceType === 'InHour'
             ? 'Khám thường'
-            : serviceType === 'Special Consultation'
-              ? 'Khám VIP'
-              : 'Khám ngoài giờ';
+            : serviceType === 'OutHour'
+              ? 'Khám ngoài giờ'
+              : 'Cấp cứu';
         await this.serviceTypeService.create(service);
       }
     }
@@ -197,7 +179,7 @@ export class AppService implements OnModuleInit {
         doctor1.dob = new Date('1976-01-01');
         doctor1.phone = `095643567${index * 2 + 1}`;
         doctor1.gender = false;
-        doctor1.address = '123 Quang Trung, Quận Gò Vấp, TP.HCM';
+        doctor1.address = new Address();
 
         const doctor2 = new Doctor();
         doctor2.employeeId = `DOC02${index * 2 + 1}`;
@@ -206,7 +188,7 @@ export class AppService implements OnModuleInit {
         doctor2.dob = new Date('1976-01-01');
         doctor2.phone = `095643545${index * 2 + 2}`;
         doctor2.gender = true;
-        doctor2.address = '123 Quang Trung, Quận Gò Vấp, TP.HCM';
+        doctor2.address = new Address();
         doctors.push(doctor1, doctor2);
       }),
     );

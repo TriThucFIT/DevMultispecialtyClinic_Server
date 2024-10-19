@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Account } from '../entities/account.entity';
 import { Role } from '../entities/role.entity';
 import { CreateAccountDto } from '../dto/auth.request.dto';
+import { Permission } from '../entities/permission.entity';
 
 @Injectable()
 export class AccountRepository {
@@ -34,8 +35,28 @@ export class AccountRepository {
 
   async setRole(username: string, role: Role): Promise<Account> {
     const account = await this.usersRepository.findOne({ where: { username } });
-    account.roles = [role];
+    account.roles = [account.roles, role].flat();
     return this.usersRepository.save(account);
+  }
+
+  async setPermission(username: string, permission: Permission) {
+    const account = await this.usersRepository.findOne({
+      where: {
+        username,
+      },
+    });
+    if (!account) {
+      throw new NotFoundException('Không tìm thấy tài khoản');
+    } else {
+      account.roles.forEach((role) => {
+        role.permissions.map((per) => {
+          if (per.resource === permission.resource) {
+            per.action = permission.action;
+          }
+        });
+      });
+      return this.usersRepository.save(account);
+    }
   }
 
   async update(

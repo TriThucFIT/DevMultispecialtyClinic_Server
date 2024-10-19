@@ -1,6 +1,7 @@
 import { BaseClassProperties } from 'src/common/BaseClassProperties';
 import { Account } from './account.entity';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Address } from './Address..type';
 
 export abstract class User extends BaseClassProperties {
   @Column({
@@ -10,7 +11,8 @@ export abstract class User extends BaseClassProperties {
   @Column({
     length: 100,
   })
-  address: string;
+  @Column('json', { nullable: true })
+  address: Address;
   @Column({
     length: 50,
   })

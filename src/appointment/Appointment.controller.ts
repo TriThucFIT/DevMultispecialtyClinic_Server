@@ -6,36 +6,54 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { CreateAppointmentDto } from './dto/Appoitment.dto';
 import { AppointmentService } from './Appointment.service';
 import { Public } from 'src/decorators/public.decorator';
-import { log } from 'console';
+import { Roles } from 'src/decorators/roles.decorator';
+import { Action, Resource, RoleName } from 'src/enums/auth.enum';
+import { Permissions } from 'src/decorators/permissions.decorator';
 
 @Controller('appointment')
 export class AppointmentController {
   constructor(private service: AppointmentService) {}
 
-  @Public()
   @Get()
-  async findAll() {
-    return this.service.findAll();
-  }
-
-  @Get(':id')
-  async findOne(@Param('id') id: number) {
-    return this.service.findOne(id);
-  }
-
-  @Get('patient/:phone')
-  @Public()
-  async findByPatientPhone(@Param('phone') phone: string) {
-    return this.service.findByPatientPhone(phone);
+  @Roles(RoleName.Receptionist)
+  @Permissions([
+    {
+      resource: Resource.Appointment,
+      actions: [Action.Manage],
+    },
+  ])
+  async findByPatientPhone(
+    @Query('phone') phone: string,
+    @Query('name') fullName: string,
+    @Query('email') email: string,
+    @Query('date') date: Date,
+  ) {
+    if (date) {
+      return this.service.findByDate(date);
+    }
+    return this.service.findByPatients(phone, fullName, email);
   }
 
   @Public()
   @Post()
   async create(@Body() appointment: CreateAppointmentDto) {
     return this.service.create(appointment);
+  }
+
+  @Delete('cancel/:id')
+  @Roles(RoleName.Receptionist)
+  @Permissions([
+    {
+      resource: Resource.Appointment,
+      actions: [Action.Manage],
+    },
+  ])
+  async cancel(@Param('id') id: number) {
+    return this.service.cancelAppointment(id);
   }
 }

@@ -1,3 +1,4 @@
+import { Address } from 'src/auth/entities/Address..type';
 import { PatientCreationDto } from 'src/patient/dto/patient.dto';
 
 export class CreateAdmissionDto {
@@ -5,9 +6,9 @@ export class CreateAdmissionDto {
   isWalkIn: boolean;
   patient: PatientCreationDto;
   doctor_id?: number;
-  receptionist_phone: string;
+  receptionist_useranme: string;
   appointment_id?: number;
-  service: number;
+  service: number | string;
   date?: Date;
   symptoms?: string;
   specialization?: string;
@@ -27,5 +28,5 @@ export class PatientSendToQueue {
   gender?: boolean;
   symptoms?: string;
   waitingTime?: number;
-  address?: string;
+  address?: Address;
 }

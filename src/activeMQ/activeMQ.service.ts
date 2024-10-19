@@ -24,11 +24,16 @@ export class ActiveMqService implements OnModuleInit {
     this.client.activate();
   }
 
-  sendMessage(queueName: string, message: string) {
+  sendMessage(queueName: string, message: string, doctorId?: string) {
     if (this.client && this.client.connected) {
+      const headers = {
+        processor: doctorId || 'general',
+      };
+
       this.client.publish({
         destination: queueName,
         body: JSON.stringify(message),
+        headers,
       });
       Logger.log(`Message sent to queue ${queueName} : ${message}`, 'ActiveMQ');
     } else {

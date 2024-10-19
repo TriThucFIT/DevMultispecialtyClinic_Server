@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { ActiveMqService } from 'src/activeMQ/activeMQ.service';
-import { PatientRegistration } from './Admission.types';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Registration } from './entities/Registration.entity';
-import { Repository } from 'typeorm';
+import { EntityNotFoundError, Repository } from 'typeorm';
 import { CreateAdmissionDto, PatientSendToQueue } from './dto/Admission.dto';
 import { AppointmentService } from 'src/appointment/Appointment.service';
 import { PatientService } from 'src/patient/patient.service';
@@ -15,6 +14,8 @@ import { Doctor } from 'src/doctor/entities/doctor.entity';
 import { ServiceType } from 'src/casher/entities/ServiceType.entity';
 import { Appointment } from 'src/appointment/entities/appointment.entity';
 import { Patient } from 'src/patient/entities/patient.entity';
+import { log } from 'console';
+import { AppointmentStatus } from 'src/appointment/enums/AppointmentStatus.enum';
 
 @Injectable()
 export class AdmissionService {
@@ -31,81 +32,126 @@ export class AdmissionService {
   ) {}
 
   async createPatientRegistration(createAdmissionDto: CreateAdmissionDto) {
-    let patient: Patient;
-    if (createAdmissionDto.patient) {
-      patient = await this.patientService.findByPhoneAndName(
-        createAdmissionDto.patient.phone,
-        createAdmissionDto.patient.fullName,
+    try {
+      let patient: Patient;
+      try {
+        if (createAdmissionDto.patient) {
+          patient = await this.patientService.findByPhoneAndName(
+            createAdmissionDto.patient.phone,
+            createAdmissionDto.patient.fullName,
+          );
+        } else {
+          throw new EntityNotFoundError(Patient, 'Patient not found');
+        }
+      } catch (error) {
+        if (error.status === 404) {
+          patient = await this.patientService.create(
+            createAdmissionDto.patient,
+          );
+        } else throw error;
+      }
+
+      let appointment: Appointment;
+      if (createAdmissionDto.appointment_id) {
+        appointment = await this.appointmentService.findOne(
+          createAdmissionDto.appointment_id,
+        );
+
+        if (appointment.status === AppointmentStatus.CANCELLED) {
+          throw new ConflictException({
+            message: 'Appointment has been cancelled',
+            message_VN: 'Lịch hẹn đã bị hủy',
+          });
+        } else if (appointment.status === AppointmentStatus.COMPLETED) {
+          throw new ConflictException({
+            message: 'Appointment has been completed',
+            message_VN: 'Lịch hẹn đã hoàn thành',
+          });
+        } else {
+          await this.appointmentService.updateAppointmentStatus(
+            appointment.id,
+            AppointmentStatus.CHECKED_IN,
+          );
+        }
+      }
+
+      let serviceType: ServiceType;
+      if (createAdmissionDto.service) {
+        if (Number(createAdmissionDto.service)) {
+          serviceType = await this.serviceTypeService.findOne(
+            Number(createAdmissionDto.service),
+          );
+        } else {
+          serviceType = await this.serviceTypeService.findByName(
+            String(createAdmissionDto.service),
+          );
+        }
+      } else {
+        serviceType = await this.serviceTypeService.findByName('InHour');
+      }
+
+      let doctor: Doctor;
+      if (createAdmissionDto.doctor_id) {
+        doctor = await this.doctorService.findOne(createAdmissionDto.doctor_id);
+      }
+
+      let receptionist: Receptionist;
+      if (createAdmissionDto.receptionist_useranme) {
+        receptionist = await this.receptionistService.findByAccount(
+          undefined,
+          createAdmissionDto.receptionist_useranme,
+        );
+      }
+
+      const registration = await this.registrationRepository.save({
+        ...createAdmissionDto,
+        patient,
+        appointment,
+        service: serviceType,
+        doctor,
+        receptionist,
+      });
+
+      const sendData: PatientSendToQueue = {
+        id: registration.id,
+        fullName: registration.patient.fullName,
+        phone: registration.patient.phone,
+        dob: registration.patient.dob.toString(),
+        age:
+          new Date().getFullYear() -
+          new Date(registration.patient.dob).getFullYear(),
+        condition: registration.symptoms,
+        priority: this.calculatePriority({
+          seviceType: registration.service?.name || 'InHour',
+          dob: registration.patient.dob,
+        }),
+        status: registration.status,
+        gender: registration.patient.gender,
+        symptoms: registration.symptoms,
+        address: registration.patient.address,
+      };
+      let queueName: string;
+
+      if (registration.service.name === 'EMERGENCY') {
+        queueName = 'emergency';
+      } else if (registration.doctor) {
+        queueName =
+          registration.doctor.specialization.specialization_id +
+          '_specialization';
+      } else {
+        queueName = registration.specialization + '_specialization';
+      }
+
+      this.activeMqService.sendMessage(
+        queueName,
+        JSON.stringify(sendData),
+        doctor?.employeeId,
       );
+      return registration;
+    } catch (error) {
+      Logger.error(error);
+      throw error;
     }
-    if (!patient) {
-      patient = await this.patientService.create(createAdmissionDto.patient);
-    }
-
-    let appointment: Appointment;
-    if (createAdmissionDto.appointment_id) {
-      appointment = await this.appointmentService.findOne(
-        createAdmissionDto.appointment_id,
-      );
-    }
-
-    let serviceType: ServiceType;
-    if (createAdmissionDto.service) {
-      serviceType = await this.serviceTypeService.findOne(
-        createAdmissionDto.service,
-      );
-    }
-
-    let doctor: Doctor;
-    if (createAdmissionDto.doctor_id) {
-      doctor = await this.doctorService.findOne(createAdmissionDto.doctor_id);
-    }
-
-    let receptionist: Receptionist;
-    if (createAdmissionDto.receptionist_phone) {
-      receptionist = await this.receptionistService.findByPhone(
-        createAdmissionDto.receptionist_phone,
-      );
-    }
-
-    const registration = await this.registrationRepository.save({
-      ...createAdmissionDto,
-      patient,
-      appointment,
-      service: serviceType,
-      doctor,
-      receptionist,
-    });
-
-    const sendData: PatientSendToQueue = {
-      id: registration.id,
-      fullName: registration.patient.fullName,
-      phone: registration.patient.phone,
-      dob: registration.patient.dob.toString(),
-      age:
-        new Date().getFullYear() -
-        new Date(registration.patient.dob).getFullYear(),
-      condition: registration.symptoms,
-      priority: this.calculatePriority({
-        seviceType: registration.service.name,
-        dob: registration.patient.dob,
-      }),
-      status: registration.status,
-      gender: registration.patient.gender,
-      symptoms: registration.symptoms,
-      address: registration.patient.address,
-    };
-    let queueName: string;
-    if (registration.service.name === 'EMERGENCY') {
-      queueName = 'emergency';
-    } else if (registration.doctor) {
-      queueName = registration.doctor.specialization + '_specialization';
-    } else {
-      queueName = 'general';
-    }
-
-    this.activeMqService.sendMessage(queueName, JSON.stringify(sendData));
-    return registration;
   }
 
   private calculatePriority(patient: any): number {

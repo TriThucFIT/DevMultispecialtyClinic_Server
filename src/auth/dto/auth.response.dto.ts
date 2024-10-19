@@ -1,10 +1,20 @@
 import { Expose, Type } from 'class-transformer';
 import { BaseDTO } from 'src/common/BaseDTO';
 import { Action, Resource, RoleName } from 'src/enums/auth.enum';
+import { Address } from '../entities/Address..type';
+
+export class SpecializationDTO {
+  @Expose()
+  name: string;
+  @Expose()
+  specialization_id: string;
+}
 
 export class UserProfileDTO extends BaseDTO {
   @Expose()
   email?: string;
+  @Expose()
+  employeeId?: string;
   @Expose()
   phone?: string;
   @Expose()
@@ -12,7 +22,7 @@ export class UserProfileDTO extends BaseDTO {
   @Expose()
   fullName?: string;
   @Expose()
-  address?: string;
+  address?: Address;
   @Expose()
   gender?: boolean;
   @Expose()
@@ -24,7 +34,7 @@ export class UserProfileDTO extends BaseDTO {
     specialization?: string;
   };
   @Expose()
-  specialization?: string;
+  specialization?: SpecializationDTO;
   @Expose()
   @Type(() => RoleResponseDto)
   roles?: RoleResponseDto[];
