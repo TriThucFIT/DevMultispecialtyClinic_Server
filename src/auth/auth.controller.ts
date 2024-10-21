@@ -1,10 +1,12 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
+  Param,
   Post,
   Request,
 } from '@nestjs/common';
@@ -13,8 +15,13 @@ import { Public } from '../decorators/public.decorator';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Permissions } from 'src/decorators/permissions.decorator';
 import { Action, Resource, RoleName } from 'src/enums/auth.enum';
-import { CreateAccountDto, SignInDto } from './dto/auth.request.dto';
+import {
+  CreateAccountDto,
+  CreatePatientAccountDto,
+  SignInDto,
+} from './dto/auth.request.dto';
 import { log } from 'console';
+import { RowDataPacket } from 'mysql2';
 
 @Controller('auth')
 export class AuthController {
@@ -43,8 +50,40 @@ export class AuthController {
     }
   }
 
+  @Public()
+  @Post('patientRegister')
+  async createPatientAccount(
+    @Body() createPatientAccountDto: CreatePatientAccountDto,
+  ) {
+    try {
+      const account = await this.authService.createPatientAccount(
+        createPatientAccountDto,
+      );
+      return {
+        message: 'Account created successfully',
+        message_VN: 'Tạo tài khoản thành công',
+        data: account,
+      };
+    } catch (error) {
+      log('error createPatientAccount', error);
+      if (error.status === 400) {
+        throw new BadRequestException({
+          message: error.response.message,
+          message_VN: error.response.message_VN,
+        });
+      }
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  @Public()
+  @Get('checkExist/:username')
+  async checkExist(@Param('username') username: string) {
+    return await this.authService.checkExist(username);
+  }
+
   @Get('profile')
-  getProfile(@Request() req : any) {
+  getProfile(@Request() req: any) {
     return this.authService.getProfile(req.user.username);
   }
 }

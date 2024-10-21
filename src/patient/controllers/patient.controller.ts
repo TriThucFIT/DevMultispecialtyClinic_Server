@@ -1,4 +1,11 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Query,
+  Res,
+} from '@nestjs/common';
 import { PatientService } from '../patient.service';
 import { Public } from 'src/decorators/public.decorator';
 
@@ -12,13 +19,22 @@ export class PatientController {
     @Query('phone') phone: string,
     @Query('fullName') fullName: string,
     @Query('email') email: string,
-    @Query('id') id: number,
+    @Query('patientId') patientId: string,
   ) {
-    return await this.service.findAll(phone, fullName, email, id);
+    return await this.service.findAll(phone, fullName, email, patientId);
   }
 
-  @Get(':id')
-  async findOne(id: number) {
-    return this.service.findOne(id);
+  @Public()
+  @Get(':patient_id')
+  async findOne(@Param('patient_id') patient_id: string) {
+    const response = await this.service.findOne(patient_id);
+    
+    if (!response) {
+      throw new NotFoundException({
+        message: 'Patient not found',
+        message_VN: 'Không tìm thấy bệnh nhân',
+      });
+    }
+    return response;
   }
 }

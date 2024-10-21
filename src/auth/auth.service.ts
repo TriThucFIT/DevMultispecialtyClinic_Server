@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AccountRepository } from './repositories/account.repository';
@@ -10,6 +11,7 @@ import { RoleName } from 'src/enums/auth.enum';
 import {
   CreateAccountDto,
   CreateBlankAccountDto,
+  CreatePatientAccountDto,
   SignInDto,
 } from './dto/auth.request.dto';
 import { UserProfileDTO } from './dto/auth.response.dto';
@@ -19,6 +21,9 @@ import { log } from 'console';
 import { Permission } from './entities/permission.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PatientService } from 'src/patient/patient.service';
+import { Patient } from 'src/patient/entities/patient.entity';
+import { Account } from './entities/account.entity';
 
 @Injectable()
 export class AuthService {
@@ -30,6 +35,7 @@ export class AuthService {
     private jwtService: JwtService,
     private doctorService: DoctorService,
     private receptionistService: ReceptionistService,
+    private patientService: PatientService,
   ) {}
 
   async signIn(signInRequest: SignInDto) {
@@ -91,6 +97,72 @@ export class AuthService {
     } catch (error) {
       throw new Error(error);
     }
+  }
+
+  async createPatientAccount(createPatientAccountDto: CreatePatientAccountDto) {
+    let patient = null;
+    if (createPatientAccountDto.patientId) {
+      patient = await this.patientService.findOne(
+        createPatientAccountDto.patientId,
+      );
+      if (patient.account) {
+        throw new BadRequestException({
+          message: 'This phone number has already registered an account',
+          message_VN: 'Số điện thoại này đã đăng ký tài khoản',
+        });
+      }
+      const findPatientByUsername = await this.userService.findOne(
+        createPatientAccountDto.username,
+      );
+      if (findPatientByUsername) {
+        throw new BadRequestException({
+          message: 'Account already exists',
+          message_VN: 'Tên đăng nhập đã tồn tại',
+        });
+      }
+    } else {
+      const findPatientById = await this.userService.findOne(
+        createPatientAccountDto.username,
+      );
+      if (findPatientById) {
+        throw new BadRequestException({
+          message: 'Account already exists',
+          message_VN: 'Tài khoản đã tồn tại',
+        });
+      }
+      patient = await this.patientService.findOne(
+        createPatientAccountDto.username,
+      );
+    }
+
+    const account = await this.userService.create(createPatientAccountDto);
+
+    if (patient) {
+      patient.account = account;
+      await this.patientService.update(patient.id, patient);
+    } else {
+      const newPatient = new Patient();
+      Object.assign(newPatient, createPatientAccountDto.patient);
+      await this.patientService.create(newPatient);
+    }
+
+    return account;
+  }
+
+  async checkExist(username: string) {
+    const user = await this.userService.findOne(username);
+    if (!user) {
+      return {
+        isExist: false,
+        message: 'Account not found',
+        message_VN: 'Tài khoản không tồn tại',
+      };
+    }
+    return {
+      isExist: true,
+      message: 'Account exists',
+      message_VN: 'Tài khoản đã tồn tại',
+    };
   }
 
   async setRoles(username: string, roles: RoleName[]) {

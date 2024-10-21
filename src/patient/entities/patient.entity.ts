@@ -13,6 +13,8 @@ export class Patient extends User {
   })
   priority: number;
   age: number;
+  @Column({ unique: true })
+  patientId: string;
   @OneToMany(
     () => MedicalInformation,
     (medicalInformation) => medicalInformation.id,

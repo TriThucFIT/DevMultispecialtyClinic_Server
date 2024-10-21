@@ -3,6 +3,7 @@ import { PatientCreationDto, PatientResponseDto } from './dto/patient.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Patient } from './entities/patient.entity';
 import { Like, Or, Repository } from 'typeorm';
+import { HttpException } from 'src/core/httpException';
 
 @Injectable()
 export class PatientService {
@@ -15,10 +16,10 @@ export class PatientService {
     phone?: string,
     fullName?: string,
     email?: string,
-    id?: number,
+    patientId?: string,
   ): Promise<PatientResponseDto[]> {
-    const queryClause = id
-      ? { id }
+    const queryClause = patientId
+      ? { patientId }
       : phone
         ? { phone: Like(`%${phone}%`) }
         : fullName
@@ -38,8 +39,12 @@ export class PatientService {
     );
   }
 
-  async findOne(id: number) {
-    return this.patientRepository.findOne({ where: { id } });
+  async findOne(patientId: string): Promise<Patient> {
+    const patients = await this.patientRepository.findOne({
+      where: { patientId },
+      relations: ['account'],
+    });
+    return patients;
   }
 
   async findByPhone(phone: string): Promise<PatientResponseDto[]> {
@@ -95,7 +100,60 @@ export class PatientService {
     return patient;
   }
 
+  async findPatientLastest(): Promise<Patient> {
+    const patients = await this.patientRepository.find({
+      order: {
+        id: 'DESC',
+      },
+      take: 1,
+    });
+    return patients[0];
+  }
+
   async create(patient: PatientCreationDto) {
-    return this.patientRepository.save(patient);
+    const patientNew = new Patient();
+    Object.assign(patientNew, patient);
+
+    const findPatient = await this.findPatientLastest();
+    if (findPatient) {
+      const patientId = parseInt(findPatient.patientId.slice(4)) + 1;
+      patientNew.patientId = `PAT0${patientId}`;
+    } else {
+      patientNew.patientId = `PAT01`;
+    }
+
+    return this.patientRepository.save(patientNew);
+  }
+
+  async update(id: number, patient: PatientCreationDto) {
+    const patientToUpdate = await this.patientRepository.findOne({
+      where: { id },
+    });
+    if (!patientToUpdate) {
+      throw new NotFoundException({
+        message: 'Patient not found',
+        message_VN: 'Không tìm thấy bệnh nhân',
+      });
+    }
+    return this.patientRepository.save({ ...patientToUpdate, ...patient });
+  }
+
+  async updateByPhoneAndName(
+    phone: string,
+    fullName: string,
+    patient: PatientCreationDto,
+  ) {
+    const patientToUpdate = await this.findByPhoneAndName(phone, fullName);
+    if (!patientToUpdate) {
+      throw new NotFoundException({
+        message: 'Patient not found',
+        message_VN: 'Không tìm thấy bệnh nhân',
+      });
+    }
+    return this.patientRepository.save({
+      ...patientToUpdate,
+      account: { email: patient.email },
+      ...patient,
+    });
   }
 }

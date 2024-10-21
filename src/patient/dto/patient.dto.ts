@@ -7,6 +7,8 @@ export class PatientCreationDto extends UserCreationDTO {}
 
 export class PatientResponseDto extends BaseDTO{
   @Expose()
+  patientId: string;
+  @Expose()
   fullName: string;
   @Expose()
   email?: string;
