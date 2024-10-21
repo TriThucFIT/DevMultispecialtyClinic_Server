@@ -24,7 +24,9 @@ export class AccountRepository {
     });
   }
 
-  async create(createAccount: CreateAccountDto): Promise<Account> {
+  async create(
+    createAccount: CreateAccountDto | CreatePatientAccountDto,
+  ): Promise<Account> {
     const account = new Account();
     account.username = createAccount.username;
     account.password = createAccount.password;
