@@ -165,6 +165,20 @@ export class AuthService {
     };
   }
 
+  async checkExistPatient(phone: string) {
+    const patient = await this.patientService.findOne(phone);
+    if (patient.account) {
+      throw new BadRequestException({
+        message: 'This phone number has already registered an account',
+        message_VN: 'Bệnh nhân đã có đăng ký tài khoản',
+      });
+    }
+    return {
+      message: 'Patient not found',
+      message_VN: 'Không tìm thấy bệnh nhân',
+    };
+  }
+
   async setRoles(username: string, roles: RoleName[]) {
     const user = await this.userService.findOne(username);
     if (!user) {

@@ -21,7 +21,6 @@ import {
   SignInDto,
 } from './dto/auth.request.dto';
 import { log } from 'console';
-import { RowDataPacket } from 'mysql2';
 
 @Controller('auth')
 export class AuthController {
@@ -80,6 +79,11 @@ export class AuthController {
   @Get('checkExist/:username')
   async checkExist(@Param('username') username: string) {
     return await this.authService.checkExist(username);
+  }
+  @Public()
+  @Get('checkExistPatient/:patientId')
+  async checkExistPatient(@Param('patientId') patientId: string) {
+    return await this.authService.checkExistPatient(patientId);
   }
 
   @Get('profile')
