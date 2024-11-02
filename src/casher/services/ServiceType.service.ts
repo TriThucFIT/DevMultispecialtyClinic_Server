@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ServiceType } from '../entities/ServiceType.entity';
+import { ServiceTypeCreationDto } from '../types';
 
 @Injectable()
 export class ServiceTypeService {
@@ -22,7 +23,7 @@ export class ServiceTypeService {
     return this.serviceTypeRepository.findOne({ where: { name } });
   }
 
-  async create(serviceType: ServiceType) {
+  async create(serviceType: ServiceTypeCreationDto) {
     return this.serviceTypeRepository.save(serviceType);
   }
 }

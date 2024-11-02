@@ -30,6 +30,13 @@ export class DoctorService {
       relations: ['specialization'],
     });
   }
+  async findByEmployeeId(employeeId: string) {
+    return this.doctorRepository.findOne({
+      where: {
+        employeeId,
+      },
+    });
+  }
 
   async findByAccount(accountId: number) {
     const doctor = await this.doctorRepository.findOne({

@@ -13,6 +13,10 @@ export class Patient extends User {
   })
   priority: number;
   age: number;
+  @Column({ unique: true,
+    default: 'PAT0' + Math.floor(Math.random() * 1000000) + 1,
+   })
+  patientId: string;
   @OneToMany(
     () => MedicalInformation,
     (medicalInformation) => medicalInformation.id,

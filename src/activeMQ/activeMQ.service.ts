@@ -40,4 +40,16 @@ export class ActiveMqService implements OnModuleInit {
       Logger.error('ActiveMQ client is not connected', 'ActiveMQ');
     }
   }
+
+  sendEmergencyMessage(message: string) {
+    if (this.client && this.client.connected) {
+      this.client.publish({
+        destination: '/topic/emergency',
+        body: JSON.stringify(message),
+      });
+      Logger.log(`Emergency message sent: ${message}`, 'ActiveMQ');
+    } else {
+      Logger.error('ActiveMQ client is not connected', 'ActiveMQ');
+    }
+  }
 }

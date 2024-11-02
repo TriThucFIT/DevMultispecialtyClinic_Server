@@ -1,9 +1,19 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { ActiveMqService } from 'src/activeMQ/activeMQ.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Registration } from './entities/Registration.entity';
 import { EntityNotFoundError, Repository } from 'typeorm';
-import { CreateAdmissionDto, PatientSendToQueue } from './dto/Admission.dto';
+import {
+  AcceptEmergency,
+  CreateAdmissionDto,
+  CreateEmergencyDTO,
+  PatientSendToQueue,
+} from './dto/Admission.dto';
 import { AppointmentService } from 'src/appointment/Appointment.service';
 import { PatientService } from 'src/patient/patient.service';
 import { ServiceTypeService } from 'src/casher/services/ServiceType.service';
@@ -14,8 +24,9 @@ import { Doctor } from 'src/doctor/entities/doctor.entity';
 import { ServiceType } from 'src/casher/entities/ServiceType.entity';
 import { Appointment } from 'src/appointment/entities/appointment.entity';
 import { Patient } from 'src/patient/entities/patient.entity';
-import { log } from 'console';
 import { AppointmentStatus } from 'src/appointment/enums/AppointmentStatus.enum';
+import { AdmissionSattus } from './enums';
+import { log } from 'console';
 
 @Injectable()
 export class AdmissionService {
@@ -36,9 +47,10 @@ export class AdmissionService {
       let patient: Patient;
       try {
         if (createAdmissionDto.patient) {
-          patient = await this.patientService.findByPhoneAndName(
+          patient = await this.patientService.updateByPhoneAndName(
             createAdmissionDto.patient.phone,
             createAdmissionDto.patient.fullName,
+            createAdmissionDto.patient,
           );
         } else {
           throw new EntityNotFoundError(Patient, 'Patient not found');
@@ -172,5 +184,101 @@ export class AdmissionService {
     }
 
     return 3;
+  }
+
+  async createEmergencyRegistration(createEmergencyDTO: CreateEmergencyDTO) {
+    try {
+      const yearOfBirth = new Date().getFullYear() - createEmergencyDTO.age;
+      const patient = await this.patientService.create({
+        fullName: createEmergencyDTO.fullName,
+        dob: new Date(yearOfBirth, 0, 1),
+        priority: 0,
+        gender: createEmergencyDTO.gender,
+        phone: 'EMERGENCY',
+      });
+
+      let serviceType = await this.serviceTypeService.findByName('Emergency');
+      if (!serviceType) {
+        serviceType = await this.serviceTypeService.create({
+          name: 'Emergency',
+          price: 0,
+          description: 'Cấp cứu',
+        });
+      }
+
+      const registration = await this.registrationRepository.save({
+        status: AdmissionSattus.EMERGENCY,
+        isWalkIn: true,
+        patient,
+        service: serviceType,
+        symptoms: createEmergencyDTO.symptoms,
+      });
+
+      const sendData: PatientSendToQueue = {
+        id: registration.id,
+        fullName: registration.patient.fullName,
+        phone: registration.patient.phone,
+        age: createEmergencyDTO.age,
+        condition: registration.symptoms,
+        priority: this.calculatePriority({
+          seviceType: registration.service?.name || 'Emergency',
+          dob: registration.patient.dob,
+        }),
+        status: AdmissionSattus.EMERGENCY,
+        gender: registration.patient.gender,
+        symptoms: createEmergencyDTO.symptoms,
+        address: registration.patient.address,
+      };
+
+      this.activeMqService.sendEmergencyMessage(JSON.stringify(sendData));
+      return sendData;
+    } catch (error) {
+      Logger.error(error);
+      throw error;
+    }
+  }
+
+  async acceptEmergency(acceptEmergency: AcceptEmergency) {
+    try {
+      log('acceptEmergency', acceptEmergency);
+      const doctor = await this.doctorService.findByEmployeeId(
+        acceptEmergency.doctor_id,
+      );
+      const registration = await this.registrationRepository.findOne({
+        where: {
+          id: acceptEmergency.registration_id,
+          status: AdmissionSattus.EMERGENCY,
+        },
+      });
+
+      if (!doctor) {
+        throw new NotFoundException({
+          message: 'Doctor not found',
+          message_VN: 'Bác sĩ không tồn tại',
+        });
+      }
+      if (!registration) {
+        throw new NotFoundException({
+          message: 'Registration not found',
+          message_VN: 'Đăng ký không tồn tại',
+        });
+      }
+
+      await this.registrationRepository.update(registration.id, {
+        status: AdmissionSattus.IN_PROGRESS,
+        doctor,
+      });
+
+      const sendDataUpadte = {
+        id: registration.id,
+        status: AdmissionSattus.IN_PROGRESS,
+        doctor_id : doctor.employeeId,
+      };
+      this.activeMqService.sendEmergencyMessage(JSON.stringify(sendDataUpadte));
+      return sendDataUpadte;
+    } catch (error) {
+      Logger.error(error);
+      throw error;
+    }
   }
 }

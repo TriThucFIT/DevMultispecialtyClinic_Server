@@ -153,9 +153,10 @@ export class AppointmentService {
       }
     }
     try {
-      const patient = await this.patientService.findByPhoneAndName(
+      const patient = await this.patientService.updateByPhoneAndName(
         appointment.patient.phone,
         appointment.patient.fullName,
+        appointment.patient
       );
       if (patient) {
         apm.patient = patient;

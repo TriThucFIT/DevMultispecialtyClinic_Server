@@ -1,6 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { PatientService } from '../patient.service';
 import { Public } from 'src/decorators/public.decorator';
+import { log } from 'console';
 
 @Controller('patient')
 export class PatientController {
@@ -12,13 +13,14 @@ export class PatientController {
     @Query('phone') phone: string,
     @Query('fullName') fullName: string,
     @Query('email') email: string,
-    @Query('id') id: number,
+    @Query('patient_id') patientId: string,
   ) {
-    return await this.service.findAll(phone, fullName, email, id);
+    log('phone', phone);
+    return this.service.findAll(phone, fullName, email, patientId);
   }
 
-  @Get(':id')
-  async findOne(id: number) {
-    return this.service.findOne(id);
+  @Get(':patient_id')
+  async findOne(@Param('patient_id') patient_id: string) {
+    return this.service.findOne(patient_id);
   }
 }

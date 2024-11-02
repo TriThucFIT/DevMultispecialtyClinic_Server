@@ -1,5 +1,6 @@
-import { Address } from 'src/auth/entities/Address..type';
+import { Address } from 'src/auth/entities/Address.type';
 import { PatientCreationDto } from 'src/patient/dto/patient.dto';
+import { AdmissionSattus } from '../enums';
 
 export class CreateAdmissionDto {
   status: string;
@@ -12,6 +13,19 @@ export class CreateAdmissionDto {
   date?: Date;
   symptoms?: string;
   specialization?: string;
+}
+
+export class CreateEmergencyDTO {
+  fullName: string;
+  age: number;
+  symptoms: string;
+  gender: boolean;
+  status: AdmissionSattus;
+}
+
+export class AcceptEmergency {
+  doctor_id: string;
+  registration_id: number;
 }
 
 export class PatientSendToQueue {

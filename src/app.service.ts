@@ -9,7 +9,7 @@ import { ServiceType } from './casher/entities/ServiceType.entity';
 import { SpecializationCreationDTO } from './doctor/dto/doctor.dto';
 import { DoctorService } from './doctor/doctor.service';
 import { Doctor } from './doctor/entities/doctor.entity';
-import { Address } from './auth/entities/Address..type';
+import { Address } from './auth/entities/Address.type';
 
 @Injectable()
 export class AppService implements OnModuleInit {

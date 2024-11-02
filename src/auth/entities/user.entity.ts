@@ -1,7 +1,7 @@
 import { BaseClassProperties } from 'src/common/BaseClassProperties';
 import { Account } from './account.entity';
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
-import { Address } from './Address..type';
+import { Column, JoinColumn, OneToOne } from 'typeorm';
+import { Address } from './Address.type';
 
 export abstract class User extends BaseClassProperties {
   @Column({

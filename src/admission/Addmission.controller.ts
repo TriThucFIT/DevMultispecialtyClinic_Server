@@ -1,9 +1,13 @@
-import { Body, Controller, Get, Post, Request } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Request } from '@nestjs/common';
 import { AdmissionService } from './Addmission.service';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Action, Resource, RoleName } from 'src/enums/auth.enum';
 import { Permissions } from 'src/decorators/permissions.decorator';
-import { CreateAdmissionDto } from './dto/Admission.dto';
+import {
+  AcceptEmergency,
+  CreateAdmissionDto,
+  CreateEmergencyDTO,
+} from './dto/Admission.dto';
 import { ServiceTypeService } from 'src/casher/services/ServiceType.service';
 import { Public } from 'src/decorators/public.decorator';
 
@@ -27,8 +31,21 @@ export class AdmissionController {
   ) {
     return this.admissionService.createPatientRegistration({
       ...createAdmissionDto,
+      
       receptionist_useranme: request.user.username,
     });
+  }
+
+  @Post('emergency')
+  async emergency(@Body() createEmergencyDTO: CreateEmergencyDTO) {
+    return this.admissionService.createEmergencyRegistration(
+      createEmergencyDTO,
+    );
+  }
+
+  @Post('accept-emergency')
+  async acceptEmergency(@Body() acceptEmergency: AcceptEmergency) {
+    return this.admissionService.acceptEmergency(acceptEmergency);
   }
 
   @Public()
