@@ -1,4 +1,4 @@
-import { Patient } from 'src/patient/entities/patient.entity';
+import { Patient } from 'src/PatientModule/entities/patient.entity';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddPatientId1729414162506 implements MigrationInterface {
