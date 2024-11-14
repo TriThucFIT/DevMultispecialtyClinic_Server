@@ -6,7 +6,8 @@ import { UserCreationDTO } from 'src/Common/UserCreationDTO';
 export class PatientCreationDto extends UserCreationDTO {
   @Expose()
   priority: number;
-
+  @Expose()
+  patientId?: string;
 }
 
 export class PatientResponseDto extends BaseDTO {

@@ -15,7 +15,11 @@ import { Public } from '../Decorators/public.decorator';
 import { Roles } from 'src/Decorators/roles.decorator';
 import { Permissions } from 'src/Decorators/permissions.decorator';
 import { Action, Resource, RoleName } from 'src/Common/Enums/auth.enum';
-import { CreateAccountDto, CreatePatientAccountDto, SignInDto } from './dto/auth.request.dto';
+import {
+  CreateAccountDto,
+  CreatePatientAccountDto,
+  SignInDto,
+} from './dto/auth.request.dto';
 import { log } from 'console';
 
 @Controller('auth')
@@ -77,8 +81,6 @@ export class AuthController {
   @Public()
   @Get('check-patientId/:patientId')
   async checkPatientId(@Param('patientId') patientId: string) {
-    console.log('patientId', patientId);
-
     return await this.authService.checkPatientId(patientId);
   }
 

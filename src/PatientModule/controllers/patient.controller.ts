@@ -19,6 +19,12 @@ export class PatientController {
     return this.service.findAll(phone, fullName, email, patientId);
   }
 
+  @Public()
+  @Get('findByPhone/:phone')
+  async findByPhone(@Param('phone') phone: string) {
+    return await this.service.findByPhone(phone);
+  }
+
   @Get(':patient_id')
   async findOne(@Param('patient_id') patient_id: string) {
     return this.service.findOne(patient_id);

@@ -21,9 +21,7 @@ import { log } from 'console';
 import { Permission } from './entities/permission.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PatientService } from 'src/patient/patient.service';
-import { Patient } from 'src/patient/entities/patient.entity';
-import { RowDataPacket } from 'mysql2';
+import { PatientService } from 'src/PatientModule/patient.service';
 
 @Injectable()
 export class AuthService {
@@ -119,12 +117,10 @@ export class AuthService {
     const account = await this.userService.findOne(username);
     if (account) {
       throw new BadRequestException({
-        code: 400,
         message: 'Tên đăng nhập đã tồn tại',
       });
     }
     return {
-      code: 200,
       message: 'Tên đăng nhập hợp lệ',
     };
   }
@@ -134,19 +130,17 @@ export class AuthService {
     const isValidPatientId = /^PAT\d{2,}$/.test(patientId);
     if (!isValidPatientId) {
       throw new BadRequestException({
-        code: 400,
         message: 'Mã bệnh nhân không hợp lệ',
       });
     }
     if (!patient) {
       throw new NotFoundException({
-        code: 404,
         message: 'Mã bệnh nhân không tồn tại',
       });
     }
+
     if (patient.account) {
       throw new BadRequestException({
-        code: 400,
         message: 'Tài khoản đã tồn tại',
       });
     }
