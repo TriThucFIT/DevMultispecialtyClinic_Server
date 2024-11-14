@@ -3,9 +3,12 @@ import { Address } from 'src/auth/entities/Address..type';
 import { BaseDTO } from 'src/common/BaseDTO';
 import { UserCreationDTO } from 'src/common/UserCreationDTO';
 
-export class PatientCreationDto extends UserCreationDTO {}
+export class PatientCreationDto extends UserCreationDTO {
+  @Expose()
+  patientId: string;
+}
 
-export class PatientResponseDto extends BaseDTO{
+export class PatientResponseDto extends BaseDTO {
   @Expose()
   patientId: string;
   @Expose()
@@ -20,4 +23,6 @@ export class PatientResponseDto extends BaseDTO{
   dob: Date;
   @Expose()
   gender: boolean;
+  @Expose()
+  accountId?: number;
 }

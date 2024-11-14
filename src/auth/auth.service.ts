@@ -23,7 +23,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PatientService } from 'src/patient/patient.service';
 import { Patient } from 'src/patient/entities/patient.entity';
-import { Account } from './entities/account.entity';
+import { RowDataPacket } from 'mysql2';
 
 @Injectable()
 export class AuthService {
@@ -60,6 +60,8 @@ export class AuthService {
       if (!createUserDto.department) {
         throw new Error('Department is required');
       }
+      console.log('roles', createUserDto.roles);
+
       const roles = await this.roleService.findByNamesOrIds(
         createUserDto.roles || [],
       );
@@ -100,83 +102,55 @@ export class AuthService {
   }
 
   async createPatientAccount(createPatientAccountDto: CreatePatientAccountDto) {
-    let patient = null;
-    if (createPatientAccountDto.patientId) {
-      patient = await this.patientService.findOne(
-        createPatientAccountDto.patientId,
-      );
-      if (patient.account) {
-        throw new BadRequestException({
-          message: 'This phone number has already registered an account',
-          message_VN: 'Số điện thoại này đã đăng ký tài khoản',
-        });
-      }
-      const findPatientByUsername = await this.userService.findOne(
-        createPatientAccountDto.username,
-      );
-      if (findPatientByUsername) {
-        throw new BadRequestException({
-          message: 'Account already exists',
-          message_VN: 'Tên đăng nhập đã tồn tại',
-        });
-      }
-    } else {
-      const findPatientById = await this.userService.findOne(
-        createPatientAccountDto.username,
-      );
-      if (findPatientById) {
-        throw new BadRequestException({
-          message: 'Account already exists',
-          message_VN: 'Tài khoản đã tồn tại',
-        });
-      }
-      patient = await this.patientService.findOne(
-        createPatientAccountDto.username,
-      );
-    }
+    await this.checkUsernameExist(createPatientAccountDto.username);
+    const patient = await this.checkPatientId(
+      createPatientAccountDto.patient.patientId,
+    );
 
     const account = await this.userService.create(createPatientAccountDto);
 
-    if (patient) {
-      patient.account = account;
-      await this.patientService.update(patient.id, patient);
-    } else {
-      const newPatient = new Patient();
-      Object.assign(newPatient, createPatientAccountDto.patient);
-      await this.patientService.create(newPatient);
-    }
+    patient.account = account;
+    await this.patientService.update(patient.id, patient);
 
-    return account;
+    return patient;
   }
 
-  async checkExist(username: string) {
-    const user = await this.userService.findOne(username);
-    if (!user) {
-      return {
-        isExist: false,
-        message: 'Account not found',
-        message_VN: 'Tài khoản không tồn tại',
-      };
-    }
-    return {
-      isExist: true,
-      message: 'Account exists',
-      message_VN: 'Tài khoản đã tồn tại',
-    };
-  }
-
-  async checkExistPatient(phone: string) {
-    const patient = await this.patientService.findOne(phone);
-    if (patient.account) {
+  async checkUsernameExist(username: string) {
+    const account = await this.userService.findOne(username);
+    if (account) {
       throw new BadRequestException({
-        message: 'This phone number has already registered an account',
-        message_VN: 'Bệnh nhân đã có đăng ký tài khoản',
+        code: 400,
+        message: 'Tên đăng nhập đã tồn tại',
       });
     }
     return {
-      message: 'Patient not found',
-      message_VN: 'Không tìm thấy bệnh nhân',
+      code: 200,
+      message: 'Tên đăng nhập hợp lệ',
     };
+  }
+
+  async checkPatientId(patientId: string) {
+    const patient = await this.patientService.findOne(patientId);
+    const isValidPatientId = /^PAT\d{2,}$/.test(patientId);
+    if (!isValidPatientId) {
+      throw new BadRequestException({
+        code: 400,
+        message: 'Mã bệnh nhân không hợp lệ',
+      });
+    }
+    if (!patient) {
+      throw new NotFoundException({
+        code: 404,
+        message: 'Mã bệnh nhân không tồn tại',
+      });
+    }
+    if (patient.account) {
+      throw new BadRequestException({
+        code: 400,
+        message: 'Tài khoản đã tồn tại',
+      });
+    }
+    return patient;
   }
 
   async setRoles(username: string, roles: RoleName[]) {

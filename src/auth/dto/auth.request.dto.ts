@@ -45,7 +45,6 @@ export class CreatePatientAccountDto {
   @IsNotEmpty()
   readonly username: string;
   readonly email?: string;
-  readonly patientId?: string;
   @IsNotEmpty()
   readonly password: string;
   patient: PatientCreationDto;

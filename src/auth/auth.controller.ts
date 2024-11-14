@@ -50,7 +50,7 @@ export class AuthController {
   }
 
   @Public()
-  @Post('patientRegister')
+  @Post('register-patient')
   async createPatientAccount(
     @Body() createPatientAccountDto: CreatePatientAccountDto,
   ) {
@@ -59,16 +59,13 @@ export class AuthController {
         createPatientAccountDto,
       );
       return {
-        message: 'Account created successfully',
-        message_VN: 'Tạo tài khoản thành công',
+        message: 'Tạo tài khoản thành công',
         data: account,
       };
     } catch (error) {
-      log('error createPatientAccount', error);
       if (error.status === 400) {
         throw new BadRequestException({
           message: error.response.message,
-          message_VN: error.response.message_VN,
         });
       }
       throw new InternalServerErrorException(error.message);
@@ -76,14 +73,17 @@ export class AuthController {
   }
 
   @Public()
-  @Get('checkExist/:username')
-  async checkExist(@Param('username') username: string) {
-    return await this.authService.checkExist(username);
+  @Get('check-username/:username')
+  async checkUsernameExist(@Param('username') username: string) {
+    return await this.authService.checkUsernameExist(username);
   }
+
   @Public()
-  @Get('checkExistPatient/:patientId')
-  async checkExistPatient(@Param('patientId') patientId: string) {
-    return await this.authService.checkExistPatient(patientId);
+  @Get('check-patientId/:patientId')
+  async checkPatientId(@Param('patientId') patientId: string) {
+    console.log('patientId', patientId);
+
+    return await this.authService.checkPatientId(patientId);
   }
 
   @Get('profile')

@@ -3,7 +3,6 @@ import { PatientCreationDto, PatientResponseDto } from './dto/patient.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Patient } from './entities/patient.entity';
 import { Like, Or, Repository } from 'typeorm';
-import { HttpException } from 'src/core/httpException';
 
 @Injectable()
 export class PatientService {
@@ -34,6 +33,7 @@ export class PatientService {
           }
         : {},
     );
+
     return patients.map((patient) =>
       PatientResponseDto.plainToInstance(patient),
     );
@@ -55,19 +55,20 @@ export class PatientService {
     if (patients && patients.length > 0) {
       return patients.map((patient) => {
         let account = patient.account;
+        
         let patientWithMail = null;
         if (account) {
           patientWithMail = {
             ...patient,
             email: account.email,
+            accountId: account.id,
           };
         }
         return PatientResponseDto.plainToInstance(patientWithMail || patient);
       });
     } else {
       throw new NotFoundException({
-        message: 'Patient not found',
-        message_VN: 'Không tìm thấy bệnh nhân',
+        message: 'Không tìm thấy bệnh nhân',
       });
     }
   }
