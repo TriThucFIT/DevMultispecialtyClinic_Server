@@ -1,18 +1,18 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { ActiveMQModule } from './activeMQ/avtiveMQ.module';
-import { AdmissionModule } from './admission/Admisstion.module';
+import { ActiveMQModule } from './ActiveMQModule/avtiveMQ.module';
+import { AdmissionModule } from './AdmissionModule/Admisstion.module';
 import { AppService } from './app.service';
-import { CasherModule } from 'src/casher/casher.module';
-import { ReceptionistModule } from './receptionist/receptionist.module';
-import { PatientModule } from './patient/patient.module';
-import { AppointmentModule } from './appointment/Appointment.module';
-import { DoctorModule } from './doctor/doctor.module';
-import { LabTestModule } from './labTest/labTest.module';
-import { PharmacistModule } from './pharmacist/pharmacist.module';
-import { dataSourceOptions } from './database/data-source';
+import { CasherModule } from 'src/CasherModule/casher.module';
+import { ReceptionistModule } from './ReceptionistModule/receptionist.module';
+import { PatientModule } from './PatientModule/patient.module';
+import { AppointmentModule } from './AppointmentModule/Appointment.module';
+import { DoctorModule } from './DoctorModule/doctor.module';
+import { LabTestModule } from './LabTestModule/labTest.module';
+import { PharmacistModule } from './PharmacistModule/pharmacist.module';
+import { dataSourceOptions } from './Database/data-source';
+import { AuthModule } from './AuthenticationModule/auth.module';
 
 @Module({
   imports: [

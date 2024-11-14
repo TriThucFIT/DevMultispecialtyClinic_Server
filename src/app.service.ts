@@ -1,15 +1,15 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { AccountRepository } from './auth/repositories/account.repository';
-import { RoleRepository } from './auth/repositories/role.repository';
-import { PermissionRepository } from './auth/repositories/pemission.repository';
-import { Permission } from './auth/entities/permission.entity';
-import { RoleName, Resource, Action } from './enums/auth.enum';
-import { ServiceTypeService } from './casher/services/ServiceType.service';
-import { ServiceType } from './casher/entities/ServiceType.entity';
-import { SpecializationCreationDTO } from './doctor/dto/doctor.dto';
-import { DoctorService } from './doctor/doctor.service';
-import { Doctor } from './doctor/entities/doctor.entity';
-import { Address } from './auth/entities/Address..type';
+import { RoleName, Resource, Action } from './Common/Enums/auth.enum';
+import { ServiceTypeService } from './CasherModule/services/ServiceType.service';
+import { ServiceType } from './CasherModule/entities/ServiceType.entity';
+import { SpecializationCreationDTO } from './DoctorModule/dto/doctor.dto';
+import { DoctorService } from './DoctorModule/doctor.service';
+import { Doctor } from './DoctorModule/entities/doctor.entity';
+import { AccountRepository } from './AuthenticationModule/repositories/account.repository';
+import { RoleRepository } from './AuthenticationModule/repositories/role.repository';
+import { PermissionRepository } from './AuthenticationModule/repositories/pemission.repository';
+import { Permission } from './AuthenticationModule/entities/permission.entity';
+import { Address } from './AuthenticationModule/entities/Address.type';
 
 @Injectable()
 export class AppService implements OnModuleInit {
