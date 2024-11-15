@@ -156,7 +156,7 @@ export class AppointmentService {
       const patient = await this.patientService.updateByPhoneAndName(
         appointment.patient.phone,
         appointment.patient.fullName,
-        appointment.patient
+        appointment.patient,
       );
       if (patient) {
         apm.patient = patient;
@@ -208,7 +208,7 @@ export class AppointmentService {
     }
   }
 
-  async updateAppointmentStatus(id: number, status: AppointmentStatus) {
+  async updateAppointmentStatusById(id: number, status: AppointmentStatus) {
     try {
       const appointment = await this.appointmentRepository.findOne({
         where: { id },
@@ -231,5 +231,16 @@ export class AppointmentService {
       Logger.error(error);
       throw error;
     }
+  }
+
+  async delete(id: number) {
+    return this.appointmentRepository.delete(id);
+  }
+
+  async update(appointment: Appointment) {
+    return this.appointmentRepository.update(
+      appointment.id as number,
+      appointment,
+    );
   }
 }

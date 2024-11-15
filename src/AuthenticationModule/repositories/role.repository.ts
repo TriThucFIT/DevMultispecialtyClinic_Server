@@ -6,11 +6,10 @@ import { In, Repository } from 'typeorm';
 import { Permission } from '../entities/permission.entity';
 import { RoleName } from 'src/Common/Enums/auth.enum';
 import { CreateRoleDto } from '../dto/auth.request.dto';
+import { log } from 'console';
 
-   
 @Injectable()
 export class RoleRepository {
-
   constructor(
     @InjectRepository(Role)
     private roleRepository: Repository<Role>,
@@ -37,12 +36,22 @@ export class RoleRepository {
     return this.roleRepository.findOne({ where: { name } });
   }
 
-  findByNamesOrIds(names: (RoleName | number |Role)[]): Promise<Role[]> {
+  findByNamesOrIds(names: (RoleName | number | Role)[]): Promise<Role[]> {
     return this.roleRepository.find({
       where: names.map((name) =>
-        typeof name === 'string' ? { name } : { id: typeof name === 'number' ? name : name.id },
+        typeof name === 'string'
+          ? { name }
+          : { id: typeof name === 'number' ? name : name.id },
       ),
     });
+  }
+
+  findByResource(resource: string): Promise<Role[]> {
+    return this.roleRepository
+      .createQueryBuilder('role')
+      .innerJoinAndSelect('role.permissions', 'permissions')
+      .where('permissions.resource = :resource', { resource })
+      .getMany();
   }
 
   findAll(): Promise<Role[]> {

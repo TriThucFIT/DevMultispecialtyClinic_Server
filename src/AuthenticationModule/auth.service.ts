@@ -10,6 +10,7 @@ import { RoleName } from 'src/Common/Enums/auth.enum';
 import {
   CreateAccountDto,
   CreateBlankAccountDto,
+  CreateRoleDto,
   SignInDto,
 } from './dto/auth.request.dto';
 import { UserProfileDTO } from './dto/auth.response.dto';
@@ -17,8 +18,9 @@ import { DoctorService } from 'src/DoctorModule/doctor.service';
 import { ReceptionistService } from 'src/ReceptionistModule/receptionist.service';
 import { log } from 'console';
 import { Permission } from './entities/permission.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CasherService } from 'src/CasherModule/services/Casher.service';
 
 @Injectable()
 export class AuthService {
@@ -30,6 +32,7 @@ export class AuthService {
     private jwtService: JwtService,
     private doctorService: DoctorService,
     private receptionistService: ReceptionistService,
+    private casherService: CasherService,
   ) {}
 
   async signIn(signInRequest: SignInDto) {
@@ -84,6 +87,14 @@ export class AuthService {
             account: user,
           });
           break;
+
+        case RoleName.Casher:
+          await this.casherService.create({
+            ...createUserDto.entity,
+            account: user,
+          });
+          break;
+
         default:
           break;
       }
@@ -186,8 +197,40 @@ export class AuthService {
           ...accountResponse,
           ...receptionist,
         });
+
+      case RoleName.Casher:
+        const casher = await this.casherService.findByAccount(account.id);
+        return UserProfileDTO.plainToInstance({
+          ...accountResponse,
+          ...casher,
+        });
       default:
         return UserProfileDTO.plainToInstance(accountResponse);
+    }
+  }
+
+  async createRole(createRoleDto: CreateRoleDto) {
+    try {
+      if (!createRoleDto.name) throw new Error('Role name is required');
+
+      if (createRoleDto.permissions) {
+        const permissions = await this.permissionService.find({
+          where: {
+            id: In(createRoleDto.permissions.flat() as number[]),
+          },
+        });
+        if (!permissions.length) {
+          throw new Error('Permission not found');
+        }
+        createRoleDto.permissions = permissions;
+        const role =
+          await this.roleService.createWithPermissions(createRoleDto);
+        return role;
+      }
+      const role = await this.roleService.create(createRoleDto);
+      return role;
+    } catch (error) {
+      throw new Error(error);
     }
   }
 }

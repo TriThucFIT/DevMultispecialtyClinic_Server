@@ -42,7 +42,7 @@ export class CreateAccountDto {
 
 export class CreateRoleDto {
   readonly name: RoleName;
-  readonly permissions: (number | string | Permission)[];
+  permissions: (number | Permission)[];
 }
 
 export class CreatePermissionDto {

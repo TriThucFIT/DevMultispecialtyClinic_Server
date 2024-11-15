@@ -80,10 +80,10 @@ export class AdmissionService {
             message_VN: 'Lịch hẹn đã hoàn thành',
           });
         } else {
-          await this.appointmentService.updateAppointmentStatus(
-            appointment.id,
-            AppointmentStatus.CHECKED_IN,
-          );
+          this.appointmentService.update({
+            ...appointment,
+            status: AppointmentStatus.CHECKED_IN,
+          });
         }
       }
 
@@ -115,7 +115,7 @@ export class AdmissionService {
         );
       }
 
-      const registration = await this.registrationRepository.save({
+      const addmission = await this.registrationRepository.save({
         ...createAdmissionDto,
         patient,
         appointment,
@@ -125,33 +125,33 @@ export class AdmissionService {
       });
 
       const sendData: PatientSendToQueue = {
-        id: registration.id,
-        fullName: registration.patient.fullName,
-        phone: registration.patient.phone,
-        dob: registration.patient.dob.toString(),
+        id: addmission.id,
+        fullName: addmission.patient.fullName,
+        phone: addmission.patient.phone,
+        dob: addmission.patient.dob.toString(),
         age:
           new Date().getFullYear() -
-          new Date(registration.patient.dob).getFullYear(),
-        condition: registration.symptoms,
+          new Date(addmission.patient.dob).getFullYear(),
+        condition: addmission.symptoms,
         priority: this.calculatePriority({
-          seviceType: registration.service?.name || 'InHour',
-          dob: registration.patient.dob,
+          seviceType: addmission.service?.name || 'InHour',
+          dob: addmission.patient.dob,
         }),
-        status: registration.status,
-        gender: registration.patient.gender,
-        symptoms: registration.symptoms,
-        address: registration.patient.address,
+        status: addmission.status,
+        gender: addmission.patient.gender,
+        symptoms: addmission.symptoms,
+        address: addmission.patient.address,
       };
       let queueName: string;
 
-      if (registration.service.name === 'EMERGENCY') {
+      if (addmission.service.name === 'EMERGENCY') {
         queueName = 'emergency';
-      } else if (registration.doctor) {
+      } else if (addmission.doctor) {
         queueName =
-          registration.doctor.specialization.specialization_id +
+          addmission.doctor.specialization.specialization_id +
           '_specialization';
       } else {
-        queueName = registration.specialization + '_specialization';
+        queueName = addmission.specialization + '_specialization';
       }
 
       this.activeMqService.sendMessage(
@@ -159,7 +159,7 @@ export class AdmissionService {
         JSON.stringify(sendData),
         doctor?.employeeId,
       );
-      return registration;
+      return addmission;
     } catch (error) {
       Logger.error(error);
       throw error;
@@ -272,7 +272,7 @@ export class AdmissionService {
       const sendDataUpadte = {
         id: registration.id,
         status: AdmissionSattus.IN_PROGRESS,
-        doctor_id : doctor.employeeId,
+        doctor_id: doctor.employeeId,
       };
       this.activeMqService.sendEmergencyMessage(JSON.stringify(sendDataUpadte));
       return sendDataUpadte;

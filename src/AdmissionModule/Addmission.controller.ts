@@ -31,7 +31,6 @@ export class AdmissionController {
   ) {
     return this.admissionService.createPatientRegistration({
       ...createAdmissionDto,
-      
       receptionist_useranme: request.user.username,
     });
   }

@@ -3,16 +3,19 @@ import { BaseClassProperties } from 'src/Common/BaseClassProperties';
 import { Column, Entity, ManyToOne, JoinColumn } from 'typeorm';
 import { Invoice } from './invoice.entity';
 
-@Entity('invoice_item') // Make sure this is an entity with @Entity decorator
+@Entity('invoice_item')
 export class InvoiceItem extends BaseClassProperties {
   @Column({
     type: 'enum',
     enum: ItemType,
-    default: ItemType.OTHER,
+    default: ItemType.SERVICE,
   })
   itemType: ItemType;
 
-  @Column()
+  @Column('decimal', {
+    precision: 10,
+    scale: 2,
+  })
   amount: number;
 
   @ManyToOne(() => Invoice, (invoice) => invoice.invoideItems)

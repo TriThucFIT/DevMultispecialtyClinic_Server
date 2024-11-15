@@ -16,6 +16,7 @@ import { PermissionRepository } from './repositories/pemission.repository';
 import { DoctorModule } from 'src/DoctorModule/doctor.module';
 import { PatientModule } from 'src/PatientModule/patient.module';
 import { ReceptionistModule } from 'src/ReceptionistModule/receptionist.module';
+import { CasherModule } from 'src/CasherModule/casher.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ReceptionistModule } from 'src/ReceptionistModule/receptionist.module';
     DoctorModule,
     PatientModule,
     ReceptionistModule,
+    CasherModule,
     TypeOrmModule.forFeature([Account, Role, Permission]),
   ],
   providers: [

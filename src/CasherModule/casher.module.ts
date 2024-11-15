@@ -6,6 +6,7 @@ import { InvoiceItem } from './entities/invoiceItem.entity';
 import { Casher } from './entities/casher.entity';
 import { PharmacistModule } from 'src/PharmacistModule/pharmacist.module';
 import { ServiceTypeService } from './services/ServiceType.service';
+import { CasherService } from './services/Casher.service';
 
 @Module({
   imports: [
@@ -19,9 +20,11 @@ import { ServiceTypeService } from './services/ServiceType.service';
     InvoiceItem,
     Casher,
     ServiceTypeService,
+    CasherService,
   ],
   exports: [
     ServiceTypeService,
+    CasherService,
   ],
 })
 export class CasherModule {}
