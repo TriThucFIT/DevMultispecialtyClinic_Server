@@ -7,10 +7,12 @@ import { Casher } from './entities/casher.entity';
 import { PharmacistModule } from 'src/PharmacistModule/pharmacist.module';
 import { ServiceTypeService } from './services/ServiceType.service';
 import { CasherService } from './services/Casher.service';
+import { PatientModule } from 'src/PatientModule/patient.module';
 
 @Module({
   imports: [
     PharmacistModule,
+    PatientModule,
     TypeOrmModule.forFeature([ServiceType, Invoice, InvoiceItem, Casher]),
   ],
   controllers: [],

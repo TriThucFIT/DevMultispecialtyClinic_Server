@@ -17,8 +17,8 @@ import { PatientController } from './controllers/patient.controller';
       Feedback,
     ]),
   ],
-  providers: [PatientService, PatientRepository],
+  providers: [PatientService, PatientRepository, Patient],
   controllers: [PatientController],
-  exports: [PatientService],
+  exports: [PatientService, Patient],
 })
 export class PatientModule {}

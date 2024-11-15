@@ -3,8 +3,10 @@ import { AfterLoad, Column, Entity, OneToMany } from 'typeorm';
 import { Registration } from 'src/AdmissionModule/entities/Registration.entity';
 import { Appointment } from 'src/AppointmentModule/entities/appointment.entity';
 import { User } from 'src/AuthenticationModule/entities/user.entity';
+import { Injectable } from '@nestjs/common';
 
 @Entity('patient')
+@Injectable()
 export class Patient extends User {
   @Column({
     type: 'int',
