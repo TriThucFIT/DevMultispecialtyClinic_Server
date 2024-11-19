@@ -1,9 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
-<<<<<<< HEAD:src/doctor/doctor.controller.ts
-import { Public } from 'src/Decorators/public.decorator';
-=======
->>>>>>> 2ed803faf176af1a2b6ef2f3117e0ff22b1c3a92:src/DoctorModule/doctor.controller.ts
 
 @Controller('doctor')
 export class DoctorController {

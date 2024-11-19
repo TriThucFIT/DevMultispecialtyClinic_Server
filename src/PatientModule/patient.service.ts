@@ -62,8 +62,12 @@ export class PatientService {
     );
   }
 
-  async findOne(patient_id: string) {
-    return this.patientRepository.findOne({ where: { patientId: patient_id } });
+  async findOne(patientId: string): Promise<Patient> {
+    const patients = await this.patientRepository.findOne({
+      where: { patientId },
+      relations: ['account'],
+    });
+    return patients;
   }
 
   async findByPhone(phone: string): Promise<PatientResponseDto[]> {

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -6,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
+  Param,
   Post,
   Request,
   UseFilters,
@@ -18,6 +20,7 @@ import { Permissions } from 'src/Decorators/permissions.decorator';
 import { Action, Resource, RoleName } from 'src/Common/Enums/auth.enum';
 import {
   CreateAccountDto,
+  CreatePatientAccountDto,
   CreateRoleDto,
   SignInDto,
 } from './dto/auth.request.dto';
@@ -64,6 +67,43 @@ export class AuthController {
       log('error', error);
       throw new InternalServerErrorException(error.message);
     }
+  }
+
+  @Public()
+  @Post('register-patient')
+  async createPatientAccount(
+    @Body() createPatientAccountDto: CreatePatientAccountDto,
+  ) {
+    try {
+      const account = await this.authService.createPatientAccount(
+        createPatientAccountDto,
+      );
+      return {
+        message: 'Tạo tài khoản thành công',
+        data: account,
+      };
+    } catch (error) {
+      if (error.status === 400) {
+        throw new BadRequestException({
+          message: error.response.message,
+        });
+      }
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  @Public()
+  @Get('check-username/:username')
+  async checkUsernameExist(@Param('username') username: string) {
+    return await this.authService.checkUsernameExist(username);
+  }
+
+  @Public()
+  @Get('check-patientId/:patientId')
+  async checkPatientId(@Param('patientId') patientId: string) {
+    console.log('patientId', patientId);
+
+    return await this.authService.checkPatientId(patientId);
   }
 
   @Get('profile')
