@@ -1,0 +1,10 @@
+{
+  "invoice_id": 3,
+  "casher_username": "string",
+  "items_to_pay": [16],
+  "total_paid": 100000,
+  "payment_method": "cash",
+  "payment_date": "2021-09-01",
+  "payment_person_name": "string",
+  "payment_person_phone": "string"
+}

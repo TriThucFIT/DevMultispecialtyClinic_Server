@@ -22,7 +22,7 @@ export class AppService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.createDefaultAdmin();
+    // await this.createDefaultAdmin();
   }
 
   createDefaultAdmin = async () => {

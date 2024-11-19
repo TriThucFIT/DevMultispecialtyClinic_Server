@@ -12,6 +12,7 @@ import {
   AcceptEmergency,
   CreateAdmissionDto,
   CreateEmergencyDTO,
+  InvoiceSendToQueue,
   PatientSendToQueue,
 } from './dto/Admission.dto';
 import { AppointmentService } from 'src/AppointmentModule/Appointment.service';
@@ -27,6 +28,12 @@ import { Patient } from 'src/PatientModule/entities/patient.entity';
 import { AppointmentStatus } from 'src/AppointmentModule/enums/AppointmentStatus.enum';
 import { AdmissionSattus } from './enums';
 import { log } from 'console';
+import { InvoiceStatus } from 'src/CasherModule/enums/InvoiceStatus.enum';
+import { plainToClass } from 'class-transformer';
+import { InvoiceItem } from 'src/CasherModule/entities/invoiceItem.entity';
+import { ItemType } from 'src/CasherModule/enums/itemType.enum';
+import { InvoiceService } from 'src/CasherModule/services/Invoice.service';
+import { InvoiceCreationDTO } from 'src/CasherModule/types/invoice';
 
 @Injectable()
 export class AdmissionService {
@@ -40,6 +47,7 @@ export class AdmissionService {
     private readonly serviceTypeService: ServiceTypeService,
     private readonly doctorService: DoctorService,
     private readonly receptionistService: ReceptionistService,
+    private readonly invoiceService: InvoiceService,
   ) {}
 
   async createPatientRegistration(createAdmissionDto: CreateAdmissionDto) {
@@ -70,15 +78,9 @@ export class AdmissionService {
         );
 
         if (appointment.status === AppointmentStatus.CANCELLED) {
-          throw new ConflictException({
-            message: 'Appointment has been cancelled',
-            message_VN: 'Lịch hẹn đã bị hủy',
-          });
+          throw new ConflictException('Lịch hẹn đã bị hủy');
         } else if (appointment.status === AppointmentStatus.COMPLETED) {
-          throw new ConflictException({
-            message: 'Appointment has been completed',
-            message_VN: 'Lịch hẹn đã hoàn thành',
-          });
+          throw new ConflictException('Lịch hẹn đã hoàn thành');
         } else {
           this.appointmentService.update({
             ...appointment,
@@ -124,7 +126,7 @@ export class AdmissionService {
         receptionist,
       });
 
-      const sendData: PatientSendToQueue = {
+      const patientToQueue: PatientSendToQueue = {
         id: addmission.id,
         fullName: addmission.patient.fullName,
         phone: addmission.patient.phone,
@@ -146,13 +148,40 @@ export class AdmissionService {
 
       if (addmission.service.name === 'EMERGENCY') {
         queueName = 'emergency';
-      } else if (addmission.doctor) {
-        queueName =
-          addmission.doctor.specialization.specialization_id +
-          '_specialization';
-      } else {
-        queueName = addmission.specialization + '_specialization';
       }
+      // else if (addmission.doctor) {
+      //   queueName =
+      //     addmission.doctor.specialization.specialization_id +
+      //     '_specialization';
+      // }
+      else {
+        queueName = 'casher_general';
+      }
+
+      const invoice_createtion: InvoiceCreationDTO = {
+        patient,
+        items: [
+          {
+            itemType: ItemType.SERVICE,
+            name: addmission.service.name,
+            amount: addmission.service.price,
+            status: InvoiceStatus.PENDING,
+          },
+        ],
+      };
+
+      const invoice = await this.invoiceService.create(invoice_createtion);
+
+      const invoiceToQueue: InvoiceSendToQueue = {
+        id: invoice.id,
+        total_amount: invoice.total_amount,
+        status: invoice.status,
+        date: invoice.date,
+        patient: patientToQueue,
+        items: invoice.invoiceItems,
+      };
+
+      const sendData = plainToClass(InvoiceSendToQueue, invoiceToQueue);
 
       this.activeMqService.sendMessage(
         queueName,
@@ -252,16 +281,10 @@ export class AdmissionService {
       });
 
       if (!doctor) {
-        throw new NotFoundException({
-          message: 'Doctor not found',
-          message_VN: 'Bác sĩ không tồn tại',
-        });
+        throw new NotFoundException('Không tìm thấy bác sĩ');
       }
       if (!registration) {
-        throw new NotFoundException({
-          message: 'Registration not found',
-          message_VN: 'Đăng ký không tồn tại',
-        });
+        throw new NotFoundException('Không tìm thấy đăng ký khám');
       }
 
       await this.registrationRepository.update(registration.id, {

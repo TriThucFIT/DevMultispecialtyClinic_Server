@@ -15,7 +15,6 @@ export class PatientController {
     @Query('email') email: string,
     @Query('patient_id') patientId: string,
   ) {
-    log('phone', phone);
     return this.service.findAll(phone, fullName, email, patientId);
   }
 

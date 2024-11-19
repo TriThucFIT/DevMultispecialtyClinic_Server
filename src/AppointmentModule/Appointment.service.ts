@@ -183,10 +183,7 @@ export class AppointmentService {
         where: { id },
       });
       if (appointment && appointment.status === AppointmentStatus.CANCELLED) {
-        throw new ConflictException({
-          message: 'Appointment already cancelled',
-          message_VN: 'Lịch hẹn đã được hủy',
-        });
+        throw new ConflictException('Lịch hẹn đã được hủy');
       }
       if (appointment) {
         appointment.status = AppointmentStatus.CANCELLED;
@@ -197,10 +194,7 @@ export class AppointmentService {
           data: result.status,
         };
       } else {
-        throw new NotFoundException({
-          message: 'Appointment not found',
-          message_VN: 'Không tìm thấy lịch hẹn',
-        });
+        throw new NotFoundException('Không tìm thấy lịch hẹn');
       }
     } catch (error) {
       Logger.error(error);
@@ -222,10 +216,7 @@ export class AppointmentService {
           data: result.status,
         };
       } else {
-        throw new NotFoundException({
-          message: 'Appointment not found',
-          message_VN: 'Không tìm thấy lịch hẹn',
-        });
+        throw new NotFoundException('Không tìm thấy lịch hẹn');
       }
     } catch (error) {
       Logger.error(error);

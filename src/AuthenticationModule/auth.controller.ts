@@ -42,20 +42,10 @@ import { Role } from './entities/role.entity';
 @UseInterceptors(ClassSerializerInterceptor)
 @UseFilters(HttpExceptionFilter)
 export class AuthController {
-  constructor(
-    private authService: AuthService,
-  ) {}
+  constructor(private authService: AuthService) {}
 
   @Public()
   @Post('login')
-  @ApiOkResponse({
-    type: ApiResponseDto<{ access_token: string }>,
-    description: 'User logged in successfully',
-  })
-  @ApiUnauthorizedResponse({
-    type: ApiResponseDto<ErrorDto>,
-    description: 'Invalid credentials',
-  })
   signIn(@Body() signInDto: SignInDto) {
     return this.authService.signIn(signInDto);
   }
@@ -63,18 +53,6 @@ export class AuthController {
   @Roles(RoleName.Admin)
   @Permissions([{ resource: Resource.Account, actions: [Action.Create] }])
   @Post('register')
-  @ApiCreatedResponse({
-    type: ApiResponseDto<UserProfileDTO>,
-    description: 'Account created successfully',
-  })
-  @ApiBadRequestResponse({
-    type: ApiResponseDto<ErrorDto>,
-    description: 'Bad Request',
-  })
-  @ApiInternalServerErrorResponse({
-    type: ApiResponseDto<ErrorDto>,
-    description: 'Internal Server Error',
-  })
   async createAccount(@Body() createUserDto: CreateAccountDto) {
     try {
       const account = await this.authService.createAccount(createUserDto);
@@ -114,7 +92,6 @@ export class AuthController {
   })
   @ApiInternalServerErrorResponse({
     type: ApiResponseDto<ErrorDto>,
-    // description: 'Internal Server Error',
   })
   async createRole(@Body() createRoleDto: CreateRoleDto) {
     try {

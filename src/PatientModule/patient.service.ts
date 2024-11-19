@@ -3,6 +3,7 @@ import { PatientCreationDto, PatientResponseDto } from './dto/patient.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Patient } from './entities/patient.entity';
 import { Like, Repository } from 'typeorm';
+import { log } from 'console';
 
 @Injectable()
 export class PatientService {
@@ -83,10 +84,7 @@ export class PatientService {
         return PatientResponseDto.plainToInstance(patientWithMail || patient);
       });
     } else {
-      throw new NotFoundException({
-        message: 'Patient not found',
-        message_VN: 'Không tìm thấy bệnh nhân',
-      });
+      throw new NotFoundException('Không tìm thấy bệnh nhân');
     }
   }
   async findByFullName(fullName: string): Promise<PatientResponseDto[]> {
@@ -94,10 +92,7 @@ export class PatientService {
       where: { fullName: Like(`%${fullName}%`) },
     });
     if (!patients || patients.length === 0) {
-      throw new NotFoundException({
-        message: 'Patient not found',
-        message_VN: 'Không tìm thấy bệnh nhân',
-      });
+      throw new NotFoundException('Không tìm thấy bệnh nhân');
     }
     return patients.map((patient) =>
       PatientResponseDto.plainToInstance(patient),
@@ -110,10 +105,7 @@ export class PatientService {
     });
 
     if (!patient) {
-      throw new NotFoundException({
-        message: 'Patient not found',
-        message_VN: 'Không tìm thấy bệnh nhân',
-      });
+      throw new NotFoundException('Không tìm thấy bệnh nhân');
     }
     return patient;
   }
@@ -133,6 +125,7 @@ export class PatientService {
     Object.assign(patientNew, patient);
 
     const findPatient = await this.findPatientLastest();
+    log("findPatient", findPatient);
     if (findPatient) {
       const patientId = parseInt(findPatient.patientId.slice(4)) + 1;
       patientNew.patientId = `PAT0${patientId}`;
@@ -148,10 +141,7 @@ export class PatientService {
       where: { id },
     });
     if (!patientToUpdate) {
-      throw new NotFoundException({
-        message: 'Patient not found',
-        message_VN: 'Không tìm thấy bệnh nhân',
-      });
+      throw new NotFoundException('Không tìm thấy bệnh nhân');
     }
     return this.patientRepository.save({ ...patientToUpdate, ...patient });
   }
@@ -163,10 +153,7 @@ export class PatientService {
   ) {
     const patientToUpdate = await this.findByPhoneAndName(phone, fullName);
     if (!patientToUpdate) {
-      throw new NotFoundException({
-        message: 'Patient not found',
-        message_VN: 'Không tìm thấy bệnh nhân',
-      });
+      throw new NotFoundException('Không tìm thấy bệnh nhân');
     }
     return this.patientRepository.save({
       ...patientToUpdate,
