@@ -1,4 +1,4 @@
-import { BaseClassProperties } from 'src/common/BaseClassProperties';
+import { BaseClassProperties } from 'src/Common/BaseClassProperties';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Prescription } from './prescription.entity';
 import { Medication } from './Medication.entity';

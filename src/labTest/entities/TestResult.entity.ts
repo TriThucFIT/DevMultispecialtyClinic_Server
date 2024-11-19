@@ -1,4 +1,4 @@
-import { BaseClassProperties } from 'src/common/BaseClassProperties';
+import { BaseClassProperties } from 'src/Common/BaseClassProperties';
 import { Column, JoinColumn, ManyToOne } from 'typeorm';
 import { LabRequest } from './LabRequest.entity';
 import { LabTest } from './LabTest.entity';

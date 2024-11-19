@@ -1,5 +1,5 @@
 import { ItemType } from 'src/casher/enums/itemType.enum';
-import { BaseClassProperties } from 'src/common/BaseClassProperties';
+import { BaseClassProperties } from 'src/Common/BaseClassProperties';
 import { Column, Entity, ManyToOne, JoinColumn } from 'typeorm';
 import { Invoice } from './invoice.entity';
 

@@ -1,6 +1,6 @@
 import { Entity, Column, ManyToMany } from 'typeorm';
 import { Role } from './role.entity';
-import { BaseClassProperties } from 'src/common/BaseClassProperties';
+import { BaseClassProperties } from 'src/Common/BaseClassProperties';
 import { Action, Resource } from 'src/enums/auth.enum';
 
 @Entity('permissions')

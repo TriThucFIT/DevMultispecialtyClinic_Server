@@ -7,7 +7,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { PatientService } from '../patient.service';
-import { Public } from 'src/decorators/public.decorator';
+import { Public } from 'src/Decorators/public.decorator';
 
 @Controller('patient')
 export class PatientController {

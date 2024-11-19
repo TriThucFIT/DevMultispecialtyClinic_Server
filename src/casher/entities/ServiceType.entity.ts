@@ -1,6 +1,6 @@
 import { Registration } from 'src/admission/entities/Registration.entity';
 import { Appointment } from 'src/appointment/entities/appointment.entity';
-import { BaseClassProperties } from 'src/common/BaseClassProperties';
+import { BaseClassProperties } from 'src/Common/BaseClassProperties';
 import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity('service')

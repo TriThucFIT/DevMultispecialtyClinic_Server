@@ -12,7 +12,7 @@ import { AppointmentModule } from './appointment/Appointment.module';
 import { DoctorModule } from './doctor/doctor.module';
 import { LabTestModule } from './labTest/labTest.module';
 import { PharmacistModule } from './pharmacist/pharmacist.module';
-import { dataSourceOptions } from './database/data-source';
+import { dataSourceOptions } from './Database/data-source';
 
 @Module({
   imports: [

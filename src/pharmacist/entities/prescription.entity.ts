@@ -1,4 +1,4 @@
-import { BaseClassProperties } from 'src/common/BaseClassProperties';
+import { BaseClassProperties } from 'src/Common/BaseClassProperties';
 import { Pharmacist } from './pharmacist.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { InvoiceItem } from 'src/casher/entities/invoiceItem.entity';

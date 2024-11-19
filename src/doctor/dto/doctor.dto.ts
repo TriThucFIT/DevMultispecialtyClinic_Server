@@ -1,4 +1,4 @@
-import { UserCreationDTO } from 'src/common/UserCreationDTO';
+import { UserCreationDTO } from 'src/Common/UserCreationDTO';
 import { Specialization } from '../entities/specialization.entity';
 
 export class DoctorAppointmentDto {

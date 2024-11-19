@@ -11,9 +11,9 @@ import {
   Request,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { Public } from '../decorators/public.decorator';
-import { Roles } from 'src/decorators/roles.decorator';
-import { Permissions } from 'src/decorators/permissions.decorator';
+import { Public } from '../Decorators/public.decorator';
+import { Roles } from 'src/Decorators/roles.decorator';
+import { Permissions } from 'src/Decorators/permissions.decorator';
 import { Action, Resource, RoleName } from 'src/enums/auth.enum';
 import {
   CreateAccountDto,

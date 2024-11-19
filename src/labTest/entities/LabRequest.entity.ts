@@ -1,4 +1,4 @@
-import { BaseClassProperties } from 'src/common/BaseClassProperties';
+import { BaseClassProperties } from 'src/Common/BaseClassProperties';
 import { Doctor } from 'src/doctor/entities/doctor.entity';
 import { MedicalRecord } from 'src/patient/entities/MedicalRecord.entity';
 import { Patient } from 'src/patient/entities/patient.entity';

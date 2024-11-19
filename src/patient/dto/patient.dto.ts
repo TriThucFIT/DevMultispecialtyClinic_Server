@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer';
 import { Address } from 'src/auth/entities/Address..type';
-import { BaseDTO } from 'src/common/BaseDTO';
-import { UserCreationDTO } from 'src/common/UserCreationDTO';
+import { BaseDTO } from 'src/Common/BaseDTO';
+import { UserCreationDTO } from 'src/Common/UserCreationDTO';
 
 export class PatientCreationDto extends UserCreationDTO {
   @Expose()

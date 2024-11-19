@@ -10,10 +10,10 @@ import {
 } from '@nestjs/common';
 import { CreateAppointmentDto } from './dto/Appoitment.dto';
 import { AppointmentService } from './Appointment.service';
-import { Public } from 'src/decorators/public.decorator';
-import { Roles } from 'src/decorators/roles.decorator';
+import { Public } from 'src/Decorators/public.decorator';
+import { Roles } from 'src/Decorators/roles.decorator';
 import { Action, Resource, RoleName } from 'src/enums/auth.enum';
-import { Permissions } from 'src/decorators/permissions.decorator';
+import { Permissions } from 'src/Decorators/permissions.decorator';
 
 @Controller('appointment')
 export class AppointmentController {

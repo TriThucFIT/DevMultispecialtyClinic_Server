@@ -1,7 +1,7 @@
 import { Entity, Column, ManyToMany, JoinTable } from 'typeorm';
 import { Account } from './account.entity';
 import { Permission } from './permission.entity';
-import { BaseClassProperties } from 'src/common/BaseClassProperties';
+import { BaseClassProperties } from 'src/Common/BaseClassProperties';
 import { RoleName } from 'src/enums/auth.enum';
 import { Expose } from 'class-transformer';
 

@@ -1,4 +1,4 @@
-import { BaseClassProperties } from 'src/common/BaseClassProperties';
+import { BaseClassProperties } from 'src/Common/BaseClassProperties';
 import { Account } from './account.entity';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { Address } from './Address..type';

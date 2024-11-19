@@ -1,11 +1,11 @@
 import { Body, Controller, Get, Post, Request } from '@nestjs/common';
 import { AdmissionService } from './Addmission.service';
-import { Roles } from 'src/decorators/roles.decorator';
+import { Roles } from 'src/Decorators/roles.decorator';
 import { Action, Resource, RoleName } from 'src/enums/auth.enum';
-import { Permissions } from 'src/decorators/permissions.decorator';
+import { Permissions } from 'src/Decorators/permissions.decorator';
 import { CreateAdmissionDto } from './dto/Admission.dto';
 import { ServiceTypeService } from 'src/casher/services/ServiceType.service';
-import { Public } from 'src/decorators/public.decorator';
+import { Public } from 'src/Decorators/public.decorator';
 
 @Controller('admission')
 export class AdmissionController {

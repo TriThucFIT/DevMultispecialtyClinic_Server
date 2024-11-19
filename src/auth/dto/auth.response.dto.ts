@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer';
-import { BaseDTO } from 'src/common/BaseDTO';
+import { BaseDTO } from 'src/Common/BaseDTO';
 import { Action, Resource, RoleName } from 'src/enums/auth.enum';
 import { Address } from '../entities/Address..type';
 

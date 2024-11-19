@@ -1,6 +1,6 @@
 import { Entity, Column, ManyToMany, JoinTable, BeforeInsert } from 'typeorm';
 import { Role } from './role.entity';
-import { BaseClassProperties } from 'src/common/BaseClassProperties';
+import { BaseClassProperties } from 'src/Common/BaseClassProperties';
 import * as bcrypt from 'bcrypt';
 import { Permission } from './permission.entity';
 
