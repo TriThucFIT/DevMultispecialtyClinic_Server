@@ -1,7 +1,6 @@
 import { PatientCreationDto } from 'src/PatientModule/dto/patient.dto';
 import { AdmissionSattus } from '../enums';
 import { Address } from 'src/AuthenticationModule/entities/Address.type';
-import { PaymentMethod } from 'src/CasherModule/enums/itemType.enum';
 import { InvoiceStatus } from 'src/CasherModule/enums/InvoiceStatus.enum';
 
 export class CreateAdmissionDto {
@@ -31,7 +30,7 @@ export class AcceptEmergency {
 }
 
 export class PatientSendToQueue {
-  id?: number;
+  id?: number | string;
   fullName?: string;
   email?: string;
   phone?: string;
@@ -53,11 +52,11 @@ export class InvoiceSendToQueue {
   status: InvoiceStatus;
   date: Date;
   patient: PatientSendToQueue;
-  items: Partial<InvoiceItem>[];
+  items: Partial<InvoiceItemQueue>[];
 }
 
-class InvoiceItem {
-  item: string;
+class InvoiceItemQueue {
+  name: string;
   status: InvoiceStatus;
   quantity?: number;
   price: number;

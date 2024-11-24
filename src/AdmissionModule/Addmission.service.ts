@@ -28,12 +28,11 @@ import { Patient } from 'src/PatientModule/entities/patient.entity';
 import { AppointmentStatus } from 'src/AppointmentModule/enums/AppointmentStatus.enum';
 import { AdmissionSattus } from './enums';
 import { log } from 'console';
-import { InvoiceStatus } from 'src/CasherModule/enums/InvoiceStatus.enum';
 import { plainToClass } from 'class-transformer';
-import { InvoiceItem } from 'src/CasherModule/entities/invoiceItem.entity';
-import { ItemType } from 'src/CasherModule/enums/itemType.enum';
 import { InvoiceService } from 'src/CasherModule/services/Invoice.service';
 import { InvoiceCreationDTO } from 'src/CasherModule/types/invoice';
+import { ItemType } from 'src/CasherModule/enums/itemType.enum';
+import { InvoiceStatus } from 'src/CasherModule/enums/InvoiceStatus.enum';
 
 @Injectable()
 export class AdmissionService {
@@ -127,7 +126,7 @@ export class AdmissionService {
       });
 
       const patientToQueue: PatientSendToQueue = {
-        id: addmission.id,
+        id: addmission.patient.patientId,
         fullName: addmission.patient.fullName,
         phone: addmission.patient.phone,
         dob: addmission.patient.dob.toString(),
@@ -178,7 +177,12 @@ export class AdmissionService {
         status: invoice.status,
         date: invoice.date,
         patient: patientToQueue,
-        items: invoice.invoiceItems,
+        items: invoice.invoiceItems.map((item) => ({
+          id : item.id,
+          name: this.serviceNameMappping[item.name] || item.name,
+          status: item.status,
+          price: item.amount,
+        })),
       };
 
       const sendData = plainToClass(InvoiceSendToQueue, invoiceToQueue);
@@ -194,6 +198,12 @@ export class AdmissionService {
       throw error;
     }
   }
+
+  private serviceNameMappping = {
+    'Emergency': 'Cấp cứu',
+    'OutHour': 'Khám ngoài giờ',
+    'InHour': 'Khám thường',
+  };
 
   private calculatePriority(patient: any): number {
     if (patient.seviceType === 'EMERGENCY') {

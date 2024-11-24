@@ -20,7 +20,7 @@ import { log } from 'console';
 import { Permission } from './entities/permission.entity';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CasherService } from 'src/CasherModule/services/Casher.service';
+import { CasherService } from 'src/CasherModule/casher.service';
 
 @Injectable()
 export class AuthService {

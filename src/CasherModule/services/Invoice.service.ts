@@ -16,8 +16,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToClass } from 'class-transformer';
 import { InvoiceStatus } from '../enums/InvoiceStatus.enum';
-import { CasherService } from './Casher.service';
 import { log } from 'console';
+import { CasherService } from '../casher.service';
 
 @Injectable()
 export class InvoiceService {
@@ -148,7 +148,7 @@ export class InvoiceService {
       payInvoice.casher_username,
     );
     invoice.payment_method = payInvoice.payment_method;
-    invoice.payment_date = payInvoice.payment_date;
+    invoice.payment_date = new Date(payInvoice.payment_date);
     invoice.payment_person_name = payInvoice.payment_person_name;
     invoice.payment_person_phone = payInvoice.payment_person_phone;
 
