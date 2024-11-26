@@ -83,6 +83,7 @@ export class PatientService {
           patientWithMail = {
             ...patient,
             email: account.email,
+            accountId: account.id,
           };
         }
         return PatientResponseDto.plainToInstance(patientWithMail || patient);

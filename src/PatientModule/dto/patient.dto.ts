@@ -30,4 +30,6 @@ export class PatientResponseDto extends BaseDTO {
   dob: Date;
   @Expose()
   gender: boolean;
+  @Expose()
+  accountId?: string;
 }

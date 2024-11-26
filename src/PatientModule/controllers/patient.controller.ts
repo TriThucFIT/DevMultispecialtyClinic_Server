@@ -22,4 +22,10 @@ export class PatientController {
   async findOne(@Param('patient_id') patient_id: string) {
     return this.service.findOne(patient_id);
   }
+
+  @Public()
+  @Get('findByPhone/:phone')
+  async findByPhone(@Param('phone') phone: string) {
+    return await this.service.findByPhone(phone);
+  }
 }

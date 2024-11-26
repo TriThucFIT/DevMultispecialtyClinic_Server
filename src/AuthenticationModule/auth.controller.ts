@@ -101,8 +101,6 @@ export class AuthController {
   @Public()
   @Get('check-patientId/:patientId')
   async checkPatientId(@Param('patientId') patientId: string) {
-    console.log('patientId', patientId);
-
     return await this.authService.checkPatientId(patientId);
   }
 
