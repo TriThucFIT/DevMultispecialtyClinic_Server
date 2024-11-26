@@ -9,7 +9,7 @@ import { CreateAppointmentDto } from './dto/Appoitment.dto';
 import { Appointment } from './entities/appointment.entity';
 import { DoctorService } from 'src/DoctorModule/doctor.service';
 import { ServiceTypeService } from 'src/CasherModule/services/ServiceType.service';
-import { PatientService } from 'src/PatientModule/patient.service';
+import { PatientService } from 'src/PatientModule/services/patient.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { log } from 'console';

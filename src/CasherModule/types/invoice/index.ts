@@ -1,4 +1,5 @@
 import { Expose, Type } from 'class-transformer';
+import { PatientSendToQueue } from 'src/AdmissionModule/dto/Admission.dto';
 import { InvoiceItem } from 'src/CasherModule/entities/invoiceItem.entity';
 import { InvoiceStatus } from 'src/CasherModule/enums/InvoiceStatus.enum';
 import { PaymentMethod } from 'src/CasherModule/enums/itemType.enum';
@@ -25,6 +26,7 @@ export type PayInvoiceRequest = {
   payment_date: Date;
   payment_person_name: string;
   payment_person_phone: string;
+  patient: PatientSendToQueue;
 };
 
 export class InvoiceResponseDTO extends BaseDTO {

@@ -16,7 +16,7 @@ import {
   PatientSendToQueue,
 } from './dto/Admission.dto';
 import { AppointmentService } from 'src/AppointmentModule/Appointment.service';
-import { PatientService } from 'src/PatientModule/patient.service';
+import { PatientService } from 'src/PatientModule/services/patient.service';
 import { ServiceTypeService } from 'src/CasherModule/services/ServiceType.service';
 import { DoctorService } from 'src/DoctorModule/doctor.service';
 import { ReceptionistService } from 'src/ReceptionistModule/receptionist.service';
@@ -54,6 +54,7 @@ export class AdmissionService {
       let patient: Patient;
       try {
         if (createAdmissionDto.patient) {
+          log('createAdmissionDto.patient', createAdmissionDto.patient);
           patient = await this.patientService.updateByPhoneAndName(
             createAdmissionDto.patient.phone,
             createAdmissionDto.patient.fullName,
@@ -142,6 +143,14 @@ export class AdmissionService {
         gender: addmission.patient.gender,
         symptoms: addmission.symptoms,
         address: addmission.patient.address,
+        admission: {
+          id: addmission.id,
+          service: addmission.service.name,
+          doctor_id: addmission.doctor?.employeeId,
+          specialization:
+            addmission.doctor?.specialization?.specialization_id ||
+            addmission.specialization,
+        },
       };
       let queueName: string;
 
@@ -178,7 +187,7 @@ export class AdmissionService {
         date: invoice.date,
         patient: patientToQueue,
         items: invoice.invoiceItems.map((item) => ({
-          id : item.id,
+          id: item.id,
           name: this.serviceNameMappping[item.name] || item.name,
           status: item.status,
           price: item.amount,
@@ -200,9 +209,9 @@ export class AdmissionService {
   }
 
   private serviceNameMappping = {
-    'Emergency': 'Cấp cứu',
-    'OutHour': 'Khám ngoài giờ',
-    'InHour': 'Khám thường',
+    Emergency: 'Cấp cứu',
+    OutHour: 'Khám ngoài giờ',
+    InHour: 'Khám thường',
   };
 
   private calculatePriority(patient: any): number {

@@ -1,42 +1,45 @@
-import { BaseClassProperties } from 'src/Common/BaseClassProperties';
-import { Doctor } from 'src/DoctorModule/entities/doctor.entity';
-import { MedicalRecord } from 'src/PatientModule/entities/MedicalRecord.entity';
-import { Patient } from 'src/PatientModule/entities/patient.entity';
-import { Column, JoinColumn, ManyToOne } from 'typeorm';
+import { MedicalRecordEntry } from 'src/PatientModule/entities/MedicalRecordEntry.entity';
+import { Entity, Column, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
 import { LabTest } from './LabTest.entity';
 import { TestResult } from './TestResult.entity';
+import { BaseClassProperties } from 'src/Common/BaseClassProperties';
+import { LabTestStatus } from '../enums';
 
+@Entity('lab_request')
 export class LabRequest extends BaseClassProperties {
-  @Column()
-  date: Date;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  requestDate: Date;
+
+  @Column({
+    type: 'enum',
+    enum: LabTestStatus,
+    default: LabTestStatus.PENDING,
+  })
+  status: LabTestStatus;
+
+  @ManyToOne(() => MedicalRecordEntry, (entry) => entry.labRequests, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({
-    name: 'doctor_id',
+    name: 'record_entry_id',
     referencedColumnName: 'id',
   })
-  @ManyToOne(() => Doctor, (doctor) => doctor.id)
-  doctor: Doctor;
-  @JoinColumn({
-    name: 'patient_id',
-    referencedColumnName: 'id',
-  })
-  @ManyToOne(() => Patient, (patient) => patient.id)
-  patient: Patient;
-  @JoinColumn({
-    name: 'medical_record_id',
-    referencedColumnName: 'id',
-  })
-  @ManyToOne(() => MedicalRecord, (medicalRecord) => medicalRecord.id)
-  medicalRecord: MedicalRecord;
+  medicalRecordEntry: MedicalRecordEntry;
+
+  @ManyToOne(() => LabTest, { onDelete: 'CASCADE' })
   @JoinColumn({
     name: 'lab_test_id',
     referencedColumnName: 'id',
   })
-  @ManyToOne(() => LabTest, (labTest) => labTest.id)
   labTest: LabTest;
+
+  @OneToOne(() => TestResult, (result) => result.labRequest, {
+    cascade: true,
+    nullable: true,
+  })
   @JoinColumn({
     name: 'test_result_id',
     referencedColumnName: 'id',
   })
-  @ManyToOne(() => TestResult, (testResult) => testResult.id)
   testResult: TestResult;
 }

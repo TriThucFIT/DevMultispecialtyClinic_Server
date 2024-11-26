@@ -1,25 +1,29 @@
 import { BaseClassProperties } from 'src/Common/BaseClassProperties';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { Patient } from './patient.entity';
+import { Column, Entity, OneToOne } from 'typeorm';
+import { MedicalRecordEntry } from './MedicalRecordEntry.entity';
 
 @Entity('medical_information')
 export class MedicalInformation extends BaseClassProperties {
   @Column()
   date: Date;
+
   @Column({ nullable: true })
   height: number;
+
   @Column({ nullable: true })
   weight: number;
+
   @Column({ nullable: true })
   bloodPressure: string;
+
   @Column({ nullable: true })
   heartRate: number;
+
   @Column({ nullable: true })
   temperature: number;
-  @JoinColumn({
-    name: 'patient_id',
-    referencedColumnName: 'id',
+
+  @OneToOne(() => MedicalRecordEntry, (entry) => entry.medicalInformation, {
+    onDelete: 'CASCADE',
   })
-  @ManyToOne(() => Patient, (patient) => patient.id)
-  patient: Patient;
+  medicalRecordEntry: MedicalRecordEntry;
 }

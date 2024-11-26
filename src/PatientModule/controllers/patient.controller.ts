@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { PatientService } from '../patient.service';
+import { PatientService } from '../services/patient.service';
 import { Public } from 'src/Decorators/public.decorator';
 import { log } from 'console';
 

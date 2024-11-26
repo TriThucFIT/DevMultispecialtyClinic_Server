@@ -44,6 +44,14 @@ export class PatientSendToQueue {
   symptoms?: string;
   waitingTime?: number;
   address?: Address;
+  admission?: AddmissionInQueue;
+}
+
+class AddmissionInQueue {
+  id: number;
+  service: string;
+  doctor_id: string;
+  specialization: string;
 }
 
 export class InvoiceSendToQueue {
