@@ -18,6 +18,8 @@ import { LabTestStatus } from './enums';
 import { TestResultCreationDto } from 'src/PatientModule/dto/patient.dto';
 import { LabTestCategory } from './entities/LabTestCategory.entity';
 import { log } from 'console';
+import { InvoiceService } from 'src/CasherModule/services/Invoice.service';
+import { ItemType } from 'src/CasherModule/enums/itemType.enum';
 
 @Injectable()
 export class LabTestService {
@@ -33,6 +35,7 @@ export class LabTestService {
     private readonly doctorService: DoctorService,
     private readonly patientService: PatientService,
     private readonly medicalRecordService: MedicalRecordService,
+    private readonly invoiceService: InvoiceService,
   ) {}
   async createLabTest(LabTestCreation: LabTestCreationDTO): Promise<LabTest> {
     const doctor = await this.doctorService.findByEmployeeId(
@@ -108,14 +111,14 @@ export class LabTestService {
     }
 
     if (medicalRecordEntry.labRequests.length) {
-      throw new Error('Đã yêu cầu xét nghiệm cho bệnh án này');
+      throw new BadRequestException('Đã yêu cầu xét nghiệm cho bệnh án này');
     }
     if (
       medicalRecordEntry.labRequests.some(
         (labRequest) => labRequest.labTest.id === request.labTestId,
       )
     ) {
-      throw new Error('Đã yêu cầu xét nghiệm này cho bệnh án này');
+      throw new BadRequestException('Đã yêu cầu xét nghiệm này cho bệnh án này');
     }
 
     const labTest = await this.findOne(request.labTestId);
@@ -140,6 +143,17 @@ export class LabTestService {
     labRequest.requestDate = new Date();
     labRequest.status = LabTestStatus.PENDING;
     labRequest.medicalRecordEntry = medicalRecordEntry;
+
+    await this.invoiceService.addInvoiceItem({
+      invoice_id: medicalRecordEntry.invoice.id,
+      items: [
+        {
+          name: labTest.name,
+          amount: labTest.price,
+          itemType: ItemType.LAB_TEST,
+        },
+      ],
+    });
     return this.labRequestRepository.save(labRequest);
   }
 
@@ -152,7 +166,7 @@ export class LabTestService {
       throw new NotFoundException('Không tìm thấy yêu cầu xét nghiệm');
     }
     if (labRequest.testResult) {
-      throw new Error('Đã có kết quả xét nghiệm cho yêu cầu này');
+      throw new BadRequestException('Đã có kết quả xét nghiệm cho yêu cầu này');
     }
     const testResult = new TestResult();
     testResult.result = result.result;
@@ -160,6 +174,7 @@ export class LabTestService {
     testResult.notes = result.notes;
     testResult.images = result.images;
     labRequest.testResult = testResult;
+    labRequest.status = LabTestStatus.COMPLETED;
     await this.labRequestRepository.save(labRequest);
     return this.testResultRepository.save(testResult);
   }

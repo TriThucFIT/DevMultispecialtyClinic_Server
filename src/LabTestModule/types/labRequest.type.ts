@@ -1,6 +1,5 @@
 import { Expose, Type } from 'class-transformer';
 import { IsNotEmpty } from 'class-validator';
-import exp from 'constants';
 import { BaseDTO } from 'src/Common/BaseDTO';
 import { DoctorResponseDto } from 'src/DoctorModule/dto/doctor.response.dto';
 import { PatientResponseDto } from 'src/PatientModule/dto/patient.dto';

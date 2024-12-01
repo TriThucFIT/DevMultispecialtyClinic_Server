@@ -12,6 +12,7 @@ import { BaseClassProperties } from 'src/Common/BaseClassProperties';
 import { Doctor } from 'src/DoctorModule/entities/doctor.entity';
 import { MedicalInformation } from './MedicalInformation.entity';
 import { MedicalRecordEntryStatus } from '../enums/MedicalRecordEntryStatus.enum';
+import { Invoice } from 'src/CasherModule/entities/invoice.entity';
 
 @Entity('medical_record_entry')
 export class MedicalRecordEntry extends BaseClassProperties {
@@ -66,4 +67,10 @@ export class MedicalRecordEntry extends BaseClassProperties {
     cascade: true,
   })
   labRequests: LabRequest[];
+
+  @OneToOne(() => Invoice, (invoice) => invoice.medicalRecordEntry, {
+    cascade: true,
+    nullable: true,
+  })
+  invoice : Invoice
 }

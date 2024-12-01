@@ -11,6 +11,7 @@ import { MedicalRecordService } from './services/MedicalRecod.service';
 import { MedicalRecordEntry } from './entities/MedicalRecordEntry.entity';
 import { DoctorModule } from 'src/DoctorModule/doctor.module';
 import { MedicalRecordController } from './controllers/MedicalRecord.controller';
+import { CasherModule } from 'src/CasherModule/casher.module';
 
 @Module({
   imports: [

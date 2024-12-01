@@ -2,6 +2,7 @@ import { PatientCreationDto } from 'src/PatientModule/dto/patient.dto';
 import { AdmissionSattus } from '../enums';
 import { Address } from 'src/AuthenticationModule/entities/Address.type';
 import { InvoiceStatus } from 'src/CasherModule/enums/InvoiceStatus.enum';
+import { MedicalRecordEntry } from 'src/PatientModule/entities/MedicalRecordEntry.entity';
 
 export class CreateAdmissionDto {
   status: string;
@@ -30,21 +31,22 @@ export class AcceptEmergency {
 }
 
 export class PatientSendToQueue {
-  id?: number | string;
-  fullName?: string;
-  email?: string;
-  phone?: string;
-  dob?: string;
-  age?: number;
-  condition?: string;
-  priority?: number;
-  status?: string;
-  arrivalOrder?: number;
-  gender?: boolean;
-  symptoms?: string;
-  waitingTime?: number;
-  address?: Address;
-  admission?: AddmissionInQueue;
+  id: number | string;
+  fullName: string;
+  email: string;
+  phone: string;
+  dob: string;
+  age: number;
+  condition: string;
+  priority: number;
+  status: string;
+  arrivalOrder: number;
+  gender: boolean;
+  symptoms: string;
+  waitingTime: number;
+  address: Address;
+  admission: Partial<AddmissionInQueue>;
+  invoiceId: number;
 }
 
 class AddmissionInQueue {
@@ -59,11 +61,12 @@ export class InvoiceSendToQueue {
   total_amount: number;
   status: InvoiceStatus;
   date: Date;
-  patient: PatientSendToQueue;
+  patient: Partial<PatientSendToQueue>;
   items: Partial<InvoiceItemQueue>[];
 }
 
 class InvoiceItemQueue {
+  id : number;
   name: string;
   status: InvoiceStatus;
   quantity?: number;

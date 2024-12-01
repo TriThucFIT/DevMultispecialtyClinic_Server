@@ -9,7 +9,8 @@ import { PatientService } from './patient.service';
 import { NotFoundException } from '@nestjs/common';
 import { MedicalRecordEntry } from '../entities/MedicalRecordEntry.entity';
 import { DoctorService } from 'src/DoctorModule/doctor.service';
-import { log, error } from 'console';
+import { error } from 'console';
+import { InvoiceService } from 'src/CasherModule/services/Invoice.service';
 
 export class MedicalRecordService {
   constructor(
@@ -77,6 +78,7 @@ export class MedicalRecordService {
           record.doctorId,
         );
       }
+      recordEntry.invoice = record.invoice;
       recordEntry.symptoms = record.symptoms;
       recordEntry.visitDate = new Date();
       recordEntry.medicalRecord =
@@ -84,7 +86,15 @@ export class MedicalRecordService {
           ? await this.findOne(record.record)
           : record.record;
 
-      return this.medicalRecordEntryRepository.save(recordEntry);
+      const new_entry =
+        await this.medicalRecordEntryRepository.save(recordEntry);
+      await this.medicalRecordRepository.save({
+        ...new_entry.medicalRecord,
+        entries: new_entry.medicalRecord?.entries?.concat(new_entry) || [
+          new_entry,
+        ],
+      });
+      return new_entry;
     } catch (e) {
       error(e);
       throw e;
@@ -96,6 +106,8 @@ export class MedicalRecordService {
       where: { id },
       relations: [
         'doctor',
+        'invoice',
+        'invoice.invoiceItems',
         'labRequests',
         'labRequests.labTest',
         'labRequests.testResult',
@@ -119,7 +131,11 @@ export class MedicalRecordService {
       recordEntry.doctor = await this.doctorService.findByEmployeeId(
         entry.doctorId,
       );
-      return this.medicalRecordEntryRepository.save(recordEntry);
+      const newEntry =
+        await this.medicalRecordEntryRepository.save(recordEntry);
+      record.entries = record.entries?.concat(newEntry) || [newEntry];
+      await this.medicalRecordRepository.save(record);
+      return newEntry;
     } catch (e) {
       error(e);
       throw e;

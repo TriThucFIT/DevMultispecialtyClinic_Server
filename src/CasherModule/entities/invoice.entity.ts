@@ -6,6 +6,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
 } from 'typeorm';
 import { BaseClassProperties } from 'src/Common/BaseClassProperties';
 import { Patient } from 'src/PatientModule/entities/patient.entity';
@@ -14,6 +15,7 @@ import { InvoiceItem } from './invoiceItem.entity';
 import { InvoiceStatus } from '../enums/InvoiceStatus.enum';
 import { PaymentMethod } from '../enums/itemType.enum';
 import { log } from 'console';
+import { MedicalRecordEntry } from 'src/PatientModule/entities/MedicalRecordEntry.entity';
 
 @Entity('invoice')
 export class Invoice extends BaseClassProperties {
@@ -78,6 +80,13 @@ export class Invoice extends BaseClassProperties {
     nullable: false,
   })
   payment_person_name: string;
+
+  @JoinColumn({
+    name: 'medical_record_entry_id',
+    referencedColumnName: 'id',
+  })
+  @OneToOne(() => MedicalRecordEntry, (entry) => entry.id)
+  medicalRecordEntry: MedicalRecordEntry;
 
   @BeforeInsert()
   setDefaultPaymentPersonInfo() {
