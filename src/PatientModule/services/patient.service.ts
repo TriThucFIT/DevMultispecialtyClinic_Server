@@ -133,6 +133,8 @@ export class PatientService {
   async create(patient: PatientCreationDto) {
     const patientNew = new Patient();
     Object.assign(patientNew, patient);
+    const lastestPatient = await this.findPatientLastest();
+    patientNew.id = (lastestPatient?.id || 0) + 1;
     patientNew.patientId = `PAT0${patientNew.id || 1}`;
     return this.patientRepository.save(patientNew);
   }
