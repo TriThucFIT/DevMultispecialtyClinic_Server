@@ -1,4 +1,5 @@
 import { Expose, Type } from 'class-transformer';
+import { ArrayNotEmpty, IsNotEmpty, IsNotEmptyObject } from 'class-validator';
 import { PatientSendToQueue } from 'src/AdmissionModule/dto/Admission.dto';
 import { InvoiceItem } from 'src/CasherModule/entities/invoiceItem.entity';
 import { InvoiceStatus } from 'src/CasherModule/enums/InvoiceStatus.enum';
@@ -12,21 +13,26 @@ export type InvoiceCreationDTO = {
   patient: Partial<Patient>;
 };
 
-export type InvoiceUpdateItemsRequest = {
+export class InvoiceUpdateItemsRequest {
+  @IsNotEmpty()
   invoice_id: number;
+  @IsNotEmpty()
   items: Partial<InvoiceItem>[];
-};
+}
 
-export type PayInvoiceRequest = {
+export class PayInvoiceRequest  {
+  @IsNotEmpty()
   invoice_id: number;
   casher_username: string;
+  @IsNotEmpty()
+  @ArrayNotEmpty()
   items_to_pay: number[];
   total_paid: number;
   payment_method: PaymentMethod;
   payment_date: Date;
   payment_person_name: string;
   payment_person_phone: string;
-  patient: PatientSendToQueue;
+  patient: Partial<PatientSendToQueue>;
 };
 
 export class InvoiceResponseDTO extends BaseDTO {

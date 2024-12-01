@@ -126,7 +126,7 @@ export class AdmissionService {
         receptionist,
       });
 
-      const patientToQueue: PatientSendToQueue = {
+      const patientToQueue: Partial<PatientSendToQueue> = {
         id: addmission.patient.patientId,
         fullName: addmission.patient.fullName,
         phone: addmission.patient.phone,
@@ -262,7 +262,7 @@ export class AdmissionService {
         symptoms: createEmergencyDTO.symptoms,
       });
 
-      const sendData: PatientSendToQueue = {
+      const sendData: Partial<PatientSendToQueue> = {
         id: registration.id,
         fullName: registration.patient.fullName,
         phone: registration.patient.phone,

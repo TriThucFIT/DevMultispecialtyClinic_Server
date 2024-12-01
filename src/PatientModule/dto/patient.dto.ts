@@ -7,15 +7,17 @@ import { MedicalRecord } from '../entities/MedicalRecord.entity';
 import { LabRequestResponseDto } from 'src/LabTestModule/types/labRequest.type';
 import { DoctorResponseDto } from 'src/DoctorModule/dto/doctor.response.dto';
 import { IsNotEmpty } from 'class-validator';
+import { Invoice } from 'src/CasherModule/entities/invoice.entity';
 
 export type MedicalRecordCreation = {
   patient: string | Patient;
   notes: string;
-  entries: MedicalRecordEntryCreation[];
+  entries?: MedicalRecordEntryCreation[];
 };
 
 export type MedicalRecordEntryCreation = {
   record: number | MedicalRecord;
+  invoice:  Invoice;
   symptoms: string;
   doctorId: string;
 };

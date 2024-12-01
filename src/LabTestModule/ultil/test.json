@@ -1,0 +1,21 @@
+{
+  "id": "XRay",
+  "name": "Chụp X Quang Tim, Phổi",
+  "testResults": {
+    "result": "Bất thường nhẹ",
+    "detail": [
+      {
+        "name": "Phổi",
+        "description": "Có dấu hiệu tổn thương nhẹ ở phổi phải.",
+        "status": "Bất thường"
+      },
+      {
+        "name": "Tim",
+        "description": "Tim có kích thước bình thường.",
+        "status": "Bình thường"
+      }
+    ],
+    "notes": "Cần kiểm tra thêm để xác định nguyên nhân.",
+    "images": ["https://example.com/xray2.jpg"]
+  }
+}

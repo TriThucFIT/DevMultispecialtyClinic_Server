@@ -19,8 +19,17 @@ import { InvoiceStatus } from '../enums/InvoiceStatus.enum';
 import { log, error } from 'console';
 import { CasherService } from '../casher.service';
 import { ActiveMqService } from 'src/ActiveMQModule/activeMQ.service';
-import { PatientSendToQueue } from 'src/AdmissionModule/dto/Admission.dto';
+import {
+  InvoiceSendToQueue,
+  PatientSendToQueue,
+} from 'src/AdmissionModule/dto/Admission.dto';
 import { MedicalRecordService } from 'src/PatientModule/services/MedicalRecod.service';
+import { MedicalRecordEntry } from 'src/PatientModule/entities/MedicalRecordEntry.entity';
+import { MedicalRecord } from 'src/PatientModule/entities/MedicalRecord.entity';
+import {
+  MedicalRecordCreation,
+  MedicalRecordEntryCreation,
+} from 'src/PatientModule/dto/patient.dto';
 
 @Injectable()
 export class InvoiceService {
@@ -97,6 +106,31 @@ export class InvoiceService {
       }),
     );
 
+    let medicalRecord = await this.medicalRecordService.findByPatientId(
+      invoice.patient.patientId,
+    );
+
+    if (!medicalRecord) {
+      const record: MedicalRecordCreation = {
+        patient: invoice.patient.patientId,
+        notes: '',
+      };
+
+      medicalRecord =
+        await this.medicalRecordService.createMedicalRecord(record);
+    }
+    const recordEntry: MedicalRecordEntryCreation = {
+      record: medicalRecord,
+      symptoms: '',
+      doctorId: null,
+      invoice: newInvoice,
+    };
+    newInvoice.medicalRecordEntry =
+      await this.medicalRecordService.addRecordEntryToRecord(
+        medicalRecord.id,
+        recordEntry,
+      );
+
     newInvoice.invoiceItems = invoiceItems;
     await this.invoiceRepository.save(newInvoice);
     return newInvoice;
@@ -106,8 +140,14 @@ export class InvoiceService {
     try {
       const invoice = await this.invoiceRepository.findOne({
         where: { id: payInvoice.invoice_id },
-        relations: ['invoiceItems', 'patient'],
+        relations: [
+          'invoiceItems',
+          'patient',
+          'medicalRecordEntry',
+          'medicalRecordEntry.medicalRecord',
+        ],
       });
+      log('invoice before pay', invoice.medicalRecordEntry);
       if (!invoice) {
         throw new NotFoundException('Không tìm thấy hóa đơn');
       }
@@ -144,10 +184,10 @@ export class InvoiceService {
         throw new BadRequestException('Số tiền thanh toán không đủ');
       }
 
-      invoice.invoiceItems.map((item) => {
+      invoice.invoiceItems.map(async (item) => {
         if (payInvoice.items_to_pay.includes(item.id)) {
           item.status = InvoiceStatus.PAID;
-          this.invoiceItemRepository.update(item.id, item);
+          await this.invoiceItemRepository.update(item.id, item);
         }
       });
 
@@ -168,38 +208,27 @@ export class InvoiceService {
 
       log('invoice after pay', invoice);
 
-      let medical_record = await this.medicalRecordService.findByPatientId(
-        invoice.patient?.patientId,
-      );
-
-      if (!medical_record) {
-        const record = {
+      if (!invoice.medicalRecordEntry) {
+        const record: MedicalRecordCreation = {
           patient: invoice.patient,
           notes: payInvoice.patient.symptoms,
-          entries: [
-            {
-              record: medical_record,
-              symptoms: payInvoice.patient.symptoms,
-              doctorId: payInvoice.patient.admission.doctor_id,
-            },
-          ],
         };
-        log('create new medical_record', record);
 
-        medical_record =
+        const medical_record =
           await this.medicalRecordService.createMedicalRecord(record);
+        const recordEntry: MedicalRecordEntryCreation = {
+          record: medical_record,
+          symptoms: payInvoice.patient.symptoms,
+          doctorId: payInvoice.patient.admission.doctor_id,
+          invoice: invoice,
+        };
+
+        log('add new entry medical_record', recordEntry);
+
+        this.medicalRecordService.createRecordEntry(recordEntry);
       }
 
-      const recordEntry = {
-        record: medical_record,
-        symptoms: payInvoice.patient.symptoms,
-        doctorId: payInvoice.patient.admission.doctor_id,
-      };
-      log('add new entry medical_record', recordEntry);
-
-      this.medicalRecordService.createRecordEntry(recordEntry);
-
-      const sendData: PatientSendToQueue = {
+      const sendData: Partial<PatientSendToQueue> = {
         id: payInvoice.patient.id,
         fullName: payInvoice.patient.fullName,
         phone: payInvoice.patient.phone,
@@ -213,6 +242,7 @@ export class InvoiceService {
         gender: payInvoice.patient.gender,
         symptoms: payInvoice.patient.symptoms,
         address: payInvoice.patient.address,
+        invoiceId: payInvoice.invoice_id,
       };
       let queueName: string;
 
@@ -240,22 +270,12 @@ export class InvoiceService {
   ): Promise<InvoiceResponseDTO> {
     const invoice = await this.invoiceRepository.findOne({
       where: { id: invoiceUpdate.invoice_id },
-      relations: ['invoiceItems'],
+      relations: ['invoiceItems', 'medicalRecordEntry', 'patient'],
     });
 
     if (!invoice) {
       throw new NotFoundException('Không tìm thấy hóa đơn');
     }
-
-    log(
-      'invoiceUpdate.items previous',
-      invoice.invoiceItems.map((i) => {
-        return {
-          name: i.name,
-          itemType: i.itemType,
-        };
-      }),
-    );
 
     const newItems = await Promise.all(
       invoiceUpdate.items.map(async (item) => {
@@ -292,6 +312,46 @@ export class InvoiceService {
 
     const updateInvoice = await this.invoiceRepository.save(invoice);
 
+    const patientToQueue: Partial<PatientSendToQueue> = {
+      id: invoice.patient.patientId,
+      fullName: invoice.patient.fullName,
+      phone: invoice.patient.phone,
+      dob: invoice.patient.dob.toString(),
+      age:
+        new Date().getFullYear() -
+        new Date(invoice.patient.dob).getFullYear(),
+      priority: invoice.patient.priority,
+      gender: invoice.patient.gender,
+      symptoms: invoice.medicalRecordEntry.symptoms,
+      address: invoice.patient.address,
+      invoiceId: invoice.id,
+      admission: {
+        doctor_id: invoice.medicalRecordEntry.doctor?.employeeId,
+      },
+    };
+
+    const invoiceToQueue: InvoiceSendToQueue = {
+      id: invoice.id,
+      total_amount: invoice.total_amount,
+      status: invoice.status,
+      date: invoice.date,
+      patient: patientToQueue,
+      items: invoice.invoiceItems.map((item) => ({
+        id: item.id,
+        name: this.serviceNameMappping[item.name] || item.name,
+        status: item.status,
+        price: Number(item.amount),
+      })),
+    };
+
+    const sendData = plainToClass(InvoiceSendToQueue, invoiceToQueue);
+
+    this.activeMqService.sendMessage(
+      'casher_general',
+      JSON.stringify(sendData),
+      invoice.medicalRecordEntry.doctor?.employeeId,
+    );
+
     return plainToClass(InvoiceResponseDTO, updateInvoice, {
       excludeExtraneousValues: true,
     });
@@ -308,4 +368,9 @@ export class InvoiceService {
   async deleteAll() {
     return this.invoiceRepository.clear();
   }
+  private serviceNameMappping = {
+    Emergency: 'Cấp cứu',
+    OutHour: 'Khám ngoài giờ',
+    InHour: 'Khám thường',
+  };
 }
