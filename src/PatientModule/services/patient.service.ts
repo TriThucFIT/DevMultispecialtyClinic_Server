@@ -1,9 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PatientCreationDto, PatientResponseDto } from './dto/patient.dto';
+import {
+  MedicalRecordCreation,
+  PatientCreationDto,
+  PatientResponseDto,
+} from '../dto/patient.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Patient } from './entities/patient.entity';
+import { Patient } from '../entities/patient.entity';
 import { Like, Repository } from 'typeorm';
 import { log } from 'console';
+import { MedicalRecord } from '../entities/MedicalRecord.entity';
 
 @Injectable()
 export class PatientService {
@@ -128,16 +133,7 @@ export class PatientService {
   async create(patient: PatientCreationDto) {
     const patientNew = new Patient();
     Object.assign(patientNew, patient);
-
-    const findPatient = await this.findPatientLastest();
-    log("findPatient", findPatient);
-    if (findPatient) {
-      const patientId = parseInt(findPatient.patientId.slice(4)) + 1;
-      patientNew.patientId = `PAT0${patientId}`;
-    } else {
-      patientNew.patientId = `PAT01`;
-    }
-
+    patientNew.patientId = `PAT0${patientNew.id || 1}`;
     return this.patientRepository.save(patientNew);
   }
 
@@ -156,6 +152,7 @@ export class PatientService {
     fullName: string,
     patient: PatientCreationDto,
   ) {
+    log('updateByPhoneAndName', patient);
     const patientToUpdate = await this.findByPhoneAndName(phone, fullName);
     if (!patientToUpdate) {
       throw new NotFoundException('Không tìm thấy bệnh nhân');

@@ -5,9 +5,21 @@ import { LabTestService } from './labTest.service';
 import { LabTest } from './entities/LabTest.entity';
 import { TestResult } from './entities/TestResult.entity';
 import { LabRequest } from './entities/LabRequest.entity';
+import { PatientModule } from 'src/PatientModule/patient.module';
+import { DoctorModule } from 'src/DoctorModule/doctor.module';
+import { LabTestCategory } from './entities/LabTestCategory.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([LabTest, TestResult, LabRequest])],
+  imports: [
+    PatientModule,
+    DoctorModule,
+    TypeOrmModule.forFeature([
+      LabTest,
+      TestResult,
+      LabRequest,
+      LabTestCategory,
+    ]),
+  ],
   providers: [LabTestService],
   controllers: [LabTestController],
   exports: [LabTestService],

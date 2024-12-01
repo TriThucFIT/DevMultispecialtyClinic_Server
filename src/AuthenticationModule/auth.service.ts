@@ -22,8 +22,8 @@ import { log } from 'console';
 import { Permission } from './entities/permission.entity';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CasherService } from 'src/CasherModule/services/Casher.service';
-import { PatientService } from 'src/PatientModule/patient.service';
+import { CasherService } from 'src/CasherModule/casher.service';
+import { PatientService } from 'src/PatientModule/services/patient.service';
 
 @Injectable()
 export class AuthService {

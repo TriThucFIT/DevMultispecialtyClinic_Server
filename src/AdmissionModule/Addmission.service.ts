@@ -16,7 +16,7 @@ import {
   PatientSendToQueue,
 } from './dto/Admission.dto';
 import { AppointmentService } from 'src/AppointmentModule/Appointment.service';
-import { PatientService } from 'src/PatientModule/patient.service';
+import { PatientService } from 'src/PatientModule/services/patient.service';
 import { ServiceTypeService } from 'src/CasherModule/services/ServiceType.service';
 import { DoctorService } from 'src/DoctorModule/doctor.service';
 import { ReceptionistService } from 'src/ReceptionistModule/receptionist.service';
@@ -28,12 +28,11 @@ import { Patient } from 'src/PatientModule/entities/patient.entity';
 import { AppointmentStatus } from 'src/AppointmentModule/enums/AppointmentStatus.enum';
 import { AdmissionSattus } from './enums';
 import { log } from 'console';
-import { InvoiceStatus } from 'src/CasherModule/enums/InvoiceStatus.enum';
 import { plainToClass } from 'class-transformer';
-import { InvoiceItem } from 'src/CasherModule/entities/invoiceItem.entity';
-import { ItemType } from 'src/CasherModule/enums/itemType.enum';
 import { InvoiceService } from 'src/CasherModule/services/Invoice.service';
 import { InvoiceCreationDTO } from 'src/CasherModule/types/invoice';
+import { ItemType } from 'src/CasherModule/enums/itemType.enum';
+import { InvoiceStatus } from 'src/CasherModule/enums/InvoiceStatus.enum';
 
 @Injectable()
 export class AdmissionService {
@@ -55,6 +54,7 @@ export class AdmissionService {
       let patient: Patient;
       try {
         if (createAdmissionDto.patient) {
+          log('createAdmissionDto.patient', createAdmissionDto.patient);
           patient = await this.patientService.updateByPhoneAndName(
             createAdmissionDto.patient.phone,
             createAdmissionDto.patient.fullName,
@@ -127,7 +127,7 @@ export class AdmissionService {
       });
 
       const patientToQueue: PatientSendToQueue = {
-        id: addmission.id,
+        id: addmission.patient.patientId,
         fullName: addmission.patient.fullName,
         phone: addmission.patient.phone,
         dob: addmission.patient.dob.toString(),
@@ -143,6 +143,14 @@ export class AdmissionService {
         gender: addmission.patient.gender,
         symptoms: addmission.symptoms,
         address: addmission.patient.address,
+        admission: {
+          id: addmission.id,
+          service: addmission.service.name,
+          doctor_id: addmission.doctor?.employeeId,
+          specialization:
+            addmission.doctor?.specialization?.specialization_id ||
+            addmission.specialization,
+        },
       };
       let queueName: string;
 
@@ -178,7 +186,12 @@ export class AdmissionService {
         status: invoice.status,
         date: invoice.date,
         patient: patientToQueue,
-        items: invoice.invoiceItems,
+        items: invoice.invoiceItems.map((item) => ({
+          id: item.id,
+          name: this.serviceNameMappping[item.name] || item.name,
+          status: item.status,
+          price: item.amount,
+        })),
       };
 
       const sendData = plainToClass(InvoiceSendToQueue, invoiceToQueue);
@@ -194,6 +207,12 @@ export class AdmissionService {
       throw error;
     }
   }
+
+  private serviceNameMappping = {
+    Emergency: 'Cấp cứu',
+    OutHour: 'Khám ngoài giờ',
+    InHour: 'Khám thường',
+  };
 
   private calculatePriority(patient: any): number {
     if (patient.seviceType === 'EMERGENCY') {

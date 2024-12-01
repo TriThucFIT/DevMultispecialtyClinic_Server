@@ -1,21 +1,23 @@
-import { BaseClassProperties } from 'src/Common/BaseClassProperties';
-import { Column, JoinColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, OneToOne } from 'typeorm';
 import { LabRequest } from './LabRequest.entity';
-import { LabTest } from './LabTest.entity';
+import { BaseClassProperties } from 'src/Common/BaseClassProperties';
 
+@Entity('test_result')
 export class TestResult extends BaseClassProperties {
-  @Column({
-    length: 500,
-  })
+  @Column({ type: 'text', nullable: true })
   result: string;
-  @Column({
-    length: 500,
-  })
+
+  @Column({ type: 'json', nullable: true })
+  detail: Record<string, any>[];
+
+  @Column({ type: 'text', nullable: true })
   notes: string;
-  @JoinColumn({
-    name: 'lab_request_id',
-    referencedColumnName: 'id',
+
+  @Column({ type: 'json', nullable: true })
+  images: string[];
+
+  @OneToOne(() => LabRequest, (request) => request.testResult, {
+    onDelete: 'CASCADE',
   })
-  @ManyToOne(() => LabTest, (labTest) => labTest.id)
-  labTest: LabTest;
+  labRequest: LabRequest;
 }
