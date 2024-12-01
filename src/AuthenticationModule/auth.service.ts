@@ -10,7 +10,6 @@ import { RoleRepository } from './repositories/role.repository';
 import { RoleName } from 'src/Common/Enums/auth.enum';
 import {
   CreateAccountDto,
-  CreateBlankAccountDto,
   CreatePatientAccountDto,
   CreateRoleDto,
   SignInDto,
@@ -114,11 +113,14 @@ export class AuthService {
       createPatientAccountDto.patient.patientId,
     );
 
+    const roles = await this.roleService.findByNamesOrIds([RoleName.Patient]);
+    createPatientAccountDto.roles = [RoleName.Patient];
     const account = await this.userService.create(createPatientAccountDto);
+
+    this.userService.setRole(createPatientAccountDto.username, roles[0]);
 
     patient.account = account;
     await this.patientService.update(patient.id, patient);
-
     return patient;
   }
 
@@ -259,6 +261,12 @@ export class AuthService {
         return UserProfileDTO.plainToInstance({
           ...accountResponse,
           ...casher,
+        });
+      case RoleName.Patient:
+        const patient = await this.patientService.findByAccount(account.id);
+        return UserProfileDTO.plainToInstance({
+          ...accountResponse,
+          ...patient,
         });
       default:
         return UserProfileDTO.plainToInstance(accountResponse);

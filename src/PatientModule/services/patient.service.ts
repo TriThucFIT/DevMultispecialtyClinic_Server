@@ -130,6 +130,16 @@ export class PatientService {
     return patients[0];
   }
 
+  async findByAccount(accountId: number): Promise<Patient> {
+    const patient = await this.patientRepository.findOne({
+      where: { account: { id: accountId } },
+    });
+    if (!patient) {
+      throw new NotFoundException('Không tìm thấy bệnh nhân');
+    }
+    return patient;
+  }
+
   async create(patient: PatientCreationDto) {
     const patientNew = new Patient();
     Object.assign(patientNew, patient);

@@ -4,8 +4,6 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
-  HttpCode,
-  HttpStatus,
   InternalServerErrorException,
   Param,
   Post,
@@ -25,7 +23,6 @@ import {
   SignInDto,
 } from './dto/auth.request.dto';
 import { log } from 'console';
-import { RoleRepository } from './repositories/role.repository';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
@@ -33,7 +30,6 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
-  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { HttpExceptionFilter } from 'src/Common/DTO/HandleException';
 import { ApiResponseDto, ErrorDto } from 'src/Common/DTO/ApiResponse.dto';

@@ -48,7 +48,7 @@ export class CreatePatientAccountDto {
   @IsNotEmpty()
   readonly password: string;
   patient: PatientCreationDto;
-  readonly roles: RoleName.Patient;
+  roles: RoleName[];
 }
 
 export class CreateRoleDto {
