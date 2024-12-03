@@ -128,9 +128,9 @@ export class MedicalRecordService {
       recordEntry.medicalRecord = record;
       recordEntry.symptoms = entry.symptoms;
       recordEntry.visitDate = new Date();
-      recordEntry.doctor = await this.doctorService.findByEmployeeId(
-        entry.doctorId,
-      );
+      recordEntry.doctor = entry.doctorId
+        ? await this.doctorService.findByEmployeeId(entry.doctorId)
+        : null;
       const newEntry =
         await this.medicalRecordEntryRepository.save(recordEntry);
       record.entries = record.entries?.concat(newEntry) || [newEntry];

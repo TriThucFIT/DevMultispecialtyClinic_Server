@@ -24,8 +24,6 @@ import {
   PatientSendToQueue,
 } from 'src/AdmissionModule/dto/Admission.dto';
 import { MedicalRecordService } from 'src/PatientModule/services/MedicalRecod.service';
-import { MedicalRecordEntry } from 'src/PatientModule/entities/MedicalRecordEntry.entity';
-import { MedicalRecord } from 'src/PatientModule/entities/MedicalRecord.entity';
 import {
   MedicalRecordCreation,
   MedicalRecordEntryCreation,
@@ -145,6 +143,7 @@ export class InvoiceService {
           'patient',
           'medicalRecordEntry',
           'medicalRecordEntry.medicalRecord',
+          'medicalRecordEntry.labRequests',
         ],
       });
       log('invoice before pay', invoice.medicalRecordEntry);
@@ -227,6 +226,8 @@ export class InvoiceService {
 
         this.medicalRecordService.createRecordEntry(recordEntry);
       }
+      log('PayInvoiceRequest', payInvoice);
+      log('PayInvoiceRequest', payInvoice.patient)
 
       const sendData: Partial<PatientSendToQueue> = {
         id: payInvoice.patient.id,
@@ -243,6 +244,14 @@ export class InvoiceService {
         symptoms: payInvoice.patient.symptoms,
         address: payInvoice.patient.address,
         invoiceId: payInvoice.invoice_id,
+        currentRecord: {
+          id: invoice.medicalRecordEntry.id,
+          labRequests:
+            invoice.medicalRecordEntry.labRequests?.map((labRequest) => ({
+              id: labRequest.id,
+              status: labRequest.status,
+            })) || [],
+        },
       };
       let queueName: string;
 
@@ -270,7 +279,7 @@ export class InvoiceService {
   ): Promise<InvoiceResponseDTO> {
     const invoice = await this.invoiceRepository.findOne({
       where: { id: invoiceUpdate.invoice_id },
-      relations: ['invoiceItems', 'medicalRecordEntry', 'patient'],
+      relations: ['invoiceItems', 'medicalRecordEntry', 'patient', 'medicalRecordEntry.doctor.specialization'],
     });
 
     if (!invoice) {
@@ -308,9 +317,13 @@ export class InvoiceService {
     invoice.calculateTotalAmount();
     invoice.calculateTotalPaid();
     invoice.calculateStatus();
-    invoice.checkStatus();
+    invoice.checkStatus()
 
     const updateInvoice = await this.invoiceRepository.save(invoice);
+
+    console.log("InvoiceService -> addInvoiceItem -> updateInvoice", invoice.medicalRecordEntry);
+    console.log("InvoiceService -> addInvoiceItem -> updateInvoice", invoice.medicalRecordEntry.doctor);
+    
 
     const patientToQueue: Partial<PatientSendToQueue> = {
       id: invoice.patient.patientId,
@@ -318,15 +331,16 @@ export class InvoiceService {
       phone: invoice.patient.phone,
       dob: invoice.patient.dob.toString(),
       age:
-        new Date().getFullYear() -
-        new Date(invoice.patient.dob).getFullYear(),
+        new Date().getFullYear() - new Date(invoice.patient.dob).getFullYear(),
       priority: invoice.patient.priority,
       gender: invoice.patient.gender,
       symptoms: invoice.medicalRecordEntry.symptoms,
       address: invoice.patient.address,
       invoiceId: invoice.id,
+      currentRecord: { id: invoice.medicalRecordEntry.id },
       admission: {
         doctor_id: invoice.medicalRecordEntry.doctor?.employeeId,
+        specialization: invoice.medicalRecordEntry.doctor?.specialization.specialization_id,
       },
     };
 
@@ -335,7 +349,7 @@ export class InvoiceService {
       total_amount: invoice.total_amount,
       status: invoice.status,
       date: invoice.date,
-      patient: patientToQueue,
+      patient: { ...patientToQueue, priority: 1 },
       items: invoice.invoiceItems.map((item) => ({
         id: item.id,
         name: this.serviceNameMappping[item.name] || item.name,

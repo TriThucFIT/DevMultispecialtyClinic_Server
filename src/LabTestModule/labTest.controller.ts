@@ -1,7 +1,18 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { LabTestService } from './labTest.service';
 import { ApiResponseDto } from 'src/Common/DTO/ApiResponse.dto';
-import { LabTestCategoryResponseDTO, LabTestCreationDTO, LabTestResponseDTO } from './types';
+import {
+  LabTestCategoryResponseDTO,
+  LabTestCreationDTO,
+  LabTestResponseDTO,
+} from './types';
 import { plainToClass } from 'class-transformer';
 import {
   LabRequestCreation,
@@ -9,6 +20,8 @@ import {
   TestResultResponseDto,
 } from './types/labRequest.type';
 import { TestResultCreationDto } from 'src/PatientModule/dto/patient.dto';
+import { log } from 'console';
+import { IsNotEmpty } from 'class-validator';
 
 @Controller('labTest')
 export class LabTestController {
@@ -26,12 +39,16 @@ export class LabTestController {
     };
   }
 
-  @Get(':id')
-  async findOne(id: number): Promise<ApiResponseDto<LabTestResponseDTO>> {
-    const lab = await this.service.findOne(id);
-
+  @Get('lab-request')
+  async findResultOfLabRequest(
+    @Query('labRequestId') id: number,
+  ): Promise<ApiResponseDto<LabRequestResponseDto>> {
+    if (!id) {
+      throw new BadRequestException('Lab request id is required');
+    }
+    const labRequest = await this.service.findResultOfLabRequest(id);
     return {
-      data: plainToClass(LabTestResponseDTO, lab, {
+      data: plainToClass(LabRequestResponseDto, labRequest, {
         excludeExtraneousValues: true,
       }),
       message: 'Success',
@@ -56,7 +73,7 @@ export class LabTestController {
   @Post('request')
   async createLabRequest(
     @Body() request: LabRequestCreation,
-  ): Promise<ApiResponseDto<LabRequestResponseDto>> {
+  ): Promise<ApiResponseDto<LabRequestResponseDto[]>> {
     const labRequest = await this.service.createLabRequest(request);
     return {
       data: plainToClass(LabRequestResponseDto, labRequest, {

@@ -6,6 +6,9 @@ import { Pharmacist } from './entities/pharmacist.entity';
 import { Medication } from './entities/Medication.entity';
 import { Prescription } from './entities/prescription.entity';
 import { PrescriptionMedication } from './entities/prescriptionMedication.entity';
+import { CasherModule } from 'src/CasherModule/casher.module';
+import { DoctorModule } from 'src/DoctorModule/doctor.module';
+import { PatientModule } from 'src/PatientModule/patient.module';
 
 @Module({
   imports: [
@@ -15,6 +18,9 @@ import { PrescriptionMedication } from './entities/prescriptionMedication.entity
       PrescriptionMedication,
       Prescription,
     ]),
+    CasherModule,
+    DoctorModule,
+    PatientModule
   ],
   providers: [
     PharmacistService,

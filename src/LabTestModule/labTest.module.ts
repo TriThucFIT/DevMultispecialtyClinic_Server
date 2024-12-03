@@ -9,6 +9,7 @@ import { PatientModule } from 'src/PatientModule/patient.module';
 import { DoctorModule } from 'src/DoctorModule/doctor.module';
 import { LabTestCategory } from './entities/LabTestCategory.entity';
 import { CasherModule } from 'src/CasherModule/casher.module';
+import { GenerateTestResult } from './ultil/GenerateTestResult.ultil';
 
 @Module({
   imports: [
@@ -22,8 +23,8 @@ import { CasherModule } from 'src/CasherModule/casher.module';
       LabTestCategory,
     ]),
   ],
-  providers: [LabTestService],
+  providers: [LabTestService, GenerateTestResult],
   controllers: [LabTestController],
-  exports: [LabTestService],
+  exports: [LabTestService, GenerateTestResult],
 })
 export class LabTestModule {}

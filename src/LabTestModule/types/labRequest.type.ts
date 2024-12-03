@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer';
-import { IsNotEmpty } from 'class-validator';
+import { ArrayNotEmpty, IsNotEmpty } from 'class-validator';
 import { BaseDTO } from 'src/Common/BaseDTO';
 import { DoctorResponseDto } from 'src/DoctorModule/dto/doctor.response.dto';
 import { PatientResponseDto } from 'src/PatientModule/dto/patient.dto';
@@ -8,12 +8,15 @@ export class LabRequestCreation {
   @IsNotEmpty()
   doctorId: string;
   @IsNotEmpty()
-  labTestId: number;
+  @ArrayNotEmpty()
+  labTestIds: number[];
   @IsNotEmpty()
   medicalRecordEntryId: number;
 }
 
 export class LabTestResponseDto extends BaseDTO {
+  @Expose()
+  id: number;
   @Expose()
   name: string;
   @Expose()
