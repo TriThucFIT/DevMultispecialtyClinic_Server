@@ -8,6 +8,14 @@ import { LabRequestResponseDto } from 'src/LabTestModule/types/labRequest.type';
 import { DoctorResponseDto } from 'src/DoctorModule/dto/doctor.response.dto';
 import { IsNotEmpty } from 'class-validator';
 import { Invoice } from 'src/CasherModule/entities/invoice.entity';
+import {
+  MedicationResponseDto,
+  PrescriptionResponseDto,
+} from 'src/PharmacistModule/types';
+import {
+  AppointmentResponseDto,
+  CreateAppointmentDto,
+} from 'src/AppointmentModule/dto/Appoitment.dto';
 
 export type MedicalRecordCreation = {
   patient: string | Patient;
@@ -17,7 +25,7 @@ export type MedicalRecordCreation = {
 
 export type MedicalRecordEntryCreation = {
   record: number | MedicalRecord;
-  invoice:  Invoice;
+  invoice: Invoice;
   symptoms: string;
   doctorId: string;
 };
@@ -67,6 +75,8 @@ export class MedicalRecordEntryResponseDto extends BaseDTO {
   @Expose()
   symptoms: string;
   @Expose()
+  note: string;
+  @Expose()
   @Type(() => DoctorResponseDto)
   doctor: DoctorResponseDto;
   @Expose()
@@ -81,6 +91,12 @@ export class MedicalRecordEntryResponseDto extends BaseDTO {
   @Expose()
   @Type(() => LabRequestResponseDto)
   labRequests: LabRequestResponseDto[];
+  @Expose()
+  @Type(() => PrescriptionResponseDto)
+  prescriptions: PrescriptionResponseDto[];
+  @Expose()
+  @Type(() => AppointmentResponseDto)
+  appointment: AppointmentResponseDto;
 }
 
 export class MedicalRecordResponseDto extends BaseDTO {
@@ -107,5 +123,13 @@ export class TestResultCreationDto {
   images: string[];
   @IsNotEmpty()
   labRequestId: number;
+}
 
+export class MedicalRecordEntryUpdate {
+  @IsNotEmpty()
+  medicalRecordEntryId: number;
+  @IsNotEmpty()
+  diagnosis: string;
+  treatmentPlan: string;
+  additionalNote: string;
 }

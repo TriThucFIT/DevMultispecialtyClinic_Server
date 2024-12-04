@@ -13,7 +13,10 @@ export class PrescriptionMedication extends BaseClassProperties {
   @JoinColumn({ name: 'medication_id', referencedColumnName: 'id' })
   medication: Medication;
 
-  @Column()
+  @Column({
+    type: 'text',
+    nullable: true,
+  })
   note: string;
 
   @Column({

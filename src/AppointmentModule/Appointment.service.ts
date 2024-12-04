@@ -1,6 +1,8 @@
 import {
   ConflictException,
+  forwardRef,
   HttpException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -14,6 +16,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { log } from 'console';
 import { AppointmentStatus } from './enums/AppointmentStatus.enum';
+import { MedicalRecordService } from 'src/PatientModule/services/MedicalRecod.service';
 
 @Injectable()
 export class AppointmentService {
@@ -23,6 +26,7 @@ export class AppointmentService {
     private readonly doctorService: DoctorService,
     private readonly patientService: PatientService,
     private readonly serviceTypeType: ServiceTypeService,
+    private readonly medicalRecordService: MedicalRecordService,
   ) {}
 
   async findAll() {
@@ -138,7 +142,7 @@ export class AppointmentService {
       if (doctor) {
         apm.doctor = doctor;
       } else {
-        throw new Error('Doctor not found');
+        throw new NotFoundException('Không tìm thấy bác sĩ');
       }
     }
     if (appointment.service) {
@@ -149,7 +153,7 @@ export class AppointmentService {
       if (serviceType) {
         apm.service = serviceType;
       } else {
-        throw new Error('Service type not found');
+        throw new NotFoundException('Không tìm thấy dịch vụ');
       }
     }
     try {
@@ -174,7 +178,15 @@ export class AppointmentService {
     apm.time = appointment.time;
     apm.symptoms = appointment.symptoms;
 
-    return this.appointmentRepository.save(apm);
+    const newAppointment = await this.appointmentRepository.save(apm);
+    if(appointment.medicalRecordEntryId){
+      const medicalRecordEntry = await this.medicalRecordService.findRecordEntry(appointment.medicalRecordEntryId);
+      if(medicalRecordEntry){
+        medicalRecordEntry.appointment = newAppointment;
+        await this.medicalRecordService.saveRecordEntry(medicalRecordEntry);
+      }
+    }
+    return newAppointment
   }
 
   async cancelAppointment(id: number) {

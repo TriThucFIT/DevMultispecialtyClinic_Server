@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prescription } from './entities/prescription.entity';
+import { Prescription } from '../entities/prescription.entity';
 import { Repository } from 'typeorm';
-import { PrescriptionMedication } from './entities/prescriptionMedication.entity';
+import { PrescriptionMedication } from '../entities/prescriptionMedication.entity';
 import { InvoiceService } from 'src/CasherModule/services/Invoice.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PatientService } from 'src/PatientModule/services/patient.service';
@@ -16,7 +16,7 @@ export class PharmacistService {
     private readonly prescriptionMedicationRepository: Repository<PrescriptionMedication>,
     private readonly patientService: PatientService,
     private readonly doctorService: DoctorService,
-    private readonly invoiceService: InvoiceService,
+    // private readonly invoiceService: InvoiceService,
   ) {}
 
     async createPrescription(prescription: Prescription) {

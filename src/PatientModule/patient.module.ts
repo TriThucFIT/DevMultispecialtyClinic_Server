@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PatientService } from './services/patient.service';
 import { Patient } from './entities/patient.entity';
@@ -11,7 +11,7 @@ import { MedicalRecordService } from './services/MedicalRecod.service';
 import { MedicalRecordEntry } from './entities/MedicalRecordEntry.entity';
 import { DoctorModule } from 'src/DoctorModule/doctor.module';
 import { MedicalRecordController } from './controllers/MedicalRecord.controller';
-import { CasherModule } from 'src/CasherModule/casher.module';
+import { AppointmentModule } from 'src/AppointmentModule/Appointment.module';
 
 @Module({
   imports: [
