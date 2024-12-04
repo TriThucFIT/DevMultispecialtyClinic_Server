@@ -34,6 +34,7 @@ export class PatientCreationDto extends UserCreationDTO {
   @Expose()
   priority: number;
 }
+export class PatientUpdateDto extends UserCreationDTO {}
 
 export class PatientResponseDto extends BaseDTO {
   @Expose()

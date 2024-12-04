@@ -17,6 +17,7 @@ import { DoctorModule } from 'src/DoctorModule/doctor.module';
 import { PatientModule } from 'src/PatientModule/patient.module';
 import { ReceptionistModule } from 'src/ReceptionistModule/receptionist.module';
 import { CasherModule } from 'src/CasherModule/casher.module';
+import { PharmacistModule } from 'src/PharmacistModule/pharmacist.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { CasherModule } from 'src/CasherModule/casher.module';
     PatientModule,
     ReceptionistModule,
     CasherModule,
+    PharmacistModule,
     TypeOrmModule.forFeature([Account, Role, Permission]),
   ],
   providers: [

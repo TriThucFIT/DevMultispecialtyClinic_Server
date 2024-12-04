@@ -3,6 +3,7 @@ import {
   MedicalRecordCreation,
   PatientCreationDto,
   PatientResponseDto,
+  PatientUpdateDto,
 } from '../dto/patient.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Patient } from '../entities/patient.entity';
@@ -95,6 +96,7 @@ export class PatientService {
   async findByFullName(fullName: string): Promise<PatientResponseDto[]> {
     const patients = await this.patientRepository.find({
       where: { fullName: Like(`%${fullName}%`) },
+      relations: ['account'],
     });
     if (!patients || patients.length === 0) {
       throw new NotFoundException('Không tìm thấy bệnh nhân');
@@ -134,14 +136,20 @@ export class PatientService {
     return this.patientRepository.save(patientNew);
   }
 
-  async update(id: number, patient: PatientCreationDto) {
+  async update(id: number | string, patient: Partial<PatientUpdateDto>) {
+    log('update', patient);
     const patientToUpdate = await this.patientRepository.findOne({
-      where: { id },
+      where: typeof id === 'string' ? { patientId: id } : { id },
+      relations: ['account'],
     });
     if (!patientToUpdate) {
       throw new NotFoundException('Không tìm thấy bệnh nhân');
     }
-    return this.patientRepository.save({ ...patientToUpdate, ...patient });
+    return this.patientRepository.save({
+      ...patientToUpdate,
+      ...patient,
+      account: { email: patient?.email ?? patientToUpdate.account?.email },
+    });
   }
 
   async updateByPhoneAndName(

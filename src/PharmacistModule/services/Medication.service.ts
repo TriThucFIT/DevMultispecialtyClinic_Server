@@ -15,6 +15,7 @@ import { PrescriptionStatus } from '../enums';
 import { InvoiceService } from 'src/CasherModule/services/Invoice.service';
 import { ItemType } from 'src/CasherModule/enums/itemType.enum';
 import { MedicalRecordService } from 'src/PatientModule/services/MedicalRecod.service';
+import { DoctorService } from 'src/DoctorModule/doctor.service';
 
 @Injectable()
 export class MedicationService {
@@ -27,6 +28,7 @@ export class MedicationService {
     private readonly prescriptionRepository: Repository<Prescription>,
     private readonly invoiceService: InvoiceService,
     private readonly medicalRecordService: MedicalRecordService,
+    private readonly doctorService: DoctorService,
   ) {}
 
   async createMedication(
@@ -65,6 +67,16 @@ export class MedicationService {
 
     if (!medicalRecordEntry) {
       throw new NotFoundException('Không tìm thấy hồ sơ bệnh án');
+    }
+    if (!medicalRecordEntry.doctor) {
+      const doctor = await this.doctorService.findByEmployeeId(
+        prescription.doctorId,
+      );
+      if (!doctor) {
+        throw new NotFoundException('Không tìm thấy bác sĩ');
+      }
+      medicalRecordEntry.doctor = doctor;
+      await this.medicalRecordService.saveRecordEntry(medicalRecordEntry);
     }
 
     let pres = this.prescriptionRepository.create();

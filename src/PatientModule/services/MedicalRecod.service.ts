@@ -117,6 +117,7 @@ export class MedicalRecordService {
         'labRequests',
         'labRequests.labTest',
         'labRequests.testResult',
+        'prescriptions.medications.medication',
       ],
     });
   }

@@ -73,6 +73,8 @@ export class PrescriptionResponseDto extends BaseDTO {
 export class PrescriptionDto {
   @IsNotEmpty()
   medicalRecordId: number;
+  @IsNotEmpty()
+  doctorId: string;
   note: string;
   @IsNotEmpty()
   @Type(() => PrescriptionMedicationDto)
