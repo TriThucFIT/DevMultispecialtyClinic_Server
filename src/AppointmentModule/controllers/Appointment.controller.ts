@@ -8,8 +8,8 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { CreateAppointmentDto } from './dto/Appoitment.dto';
-import { AppointmentService } from './Appointment.service';
+import { CreateAppointmentDto } from '../dto/Appoitment.dto';
+import { AppointmentService } from '../Appointment.service';
 import { Public } from 'src/Decorators/public.decorator';
 import { Roles } from 'src/Decorators/roles.decorator';
 import { Action, Resource, RoleName } from 'src/Common/Enums/auth.enum';

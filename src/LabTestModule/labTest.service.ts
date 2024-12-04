@@ -12,7 +12,11 @@ import { DoctorService } from 'src/DoctorModule/doctor.service';
 import { LabRequest } from './entities/LabRequest.entity';
 import { TestResult } from './entities/TestResult.entity';
 import { LabTestCategoryCreationDTO, LabTestCreationDTO } from './types';
-import { LabRequestCreation } from './types/labRequest.type';
+import {
+  LabRequestCreation,
+  LabRequestResponseDto,
+  TestResultResponseDto,
+} from './types/labRequest.type';
 import { MedicalRecordService } from 'src/PatientModule/services/MedicalRecod.service';
 import { LabTestStatus } from './enums';
 import { TestResultCreationDto } from 'src/PatientModule/dto/patient.dto';
@@ -20,6 +24,7 @@ import { LabTestCategory } from './entities/LabTestCategory.entity';
 import { log } from 'console';
 import { InvoiceService } from 'src/CasherModule/services/Invoice.service';
 import { ItemType } from 'src/CasherModule/enums/itemType.enum';
+import { GenerateTestResult } from './ultil/GenerateTestResult.ultil';
 
 @Injectable()
 export class LabTestService {
@@ -33,9 +38,9 @@ export class LabTestService {
     @InjectRepository(LabTestCategory)
     private readonly labTestCategoryRepository: Repository<LabTestCategory>,
     private readonly doctorService: DoctorService,
-    private readonly patientService: PatientService,
     private readonly medicalRecordService: MedicalRecordService,
     private readonly invoiceService: InvoiceService,
+    private readonly genTestResult: GenerateTestResult,
   ) {}
   async createLabTest(LabTestCreation: LabTestCreationDTO): Promise<LabTest> {
     const doctor = await this.doctorService.findByEmployeeId(
@@ -101,7 +106,21 @@ export class LabTestService {
     return lab;
   }
 
-  async createLabRequest(request: LabRequestCreation): Promise<LabRequest> {
+  async findResultOfLabRequest(
+    labRequestId: number,
+  ): Promise<Partial<LabRequestResponseDto>> {
+
+    const labRequest = await this.labRequestRepository.findOne({
+      where: { id: labRequestId },
+      relations: ['testResult', 'labTest'],
+    });
+    if (!labRequest) {
+      throw new NotFoundException('Không tìm thấy yêu cầu xét nghiệm');
+    }
+    return labRequest;
+  }
+
+  async createLabRequest(request: LabRequestCreation): Promise<LabRequest[]> {
     let medicalRecordEntry = await this.medicalRecordService.findRecordEntry(
       request.medicalRecordEntryId,
     );
@@ -110,19 +129,20 @@ export class LabTestService {
       throw new NotFoundException('Không tìm thấy hồ sơ bệnh án');
     }
 
-    if (medicalRecordEntry.labRequests.length) {
-      throw new BadRequestException('Đã yêu cầu xét nghiệm cho bệnh án này');
-    }
     if (
-      medicalRecordEntry.labRequests.some(
-        (labRequest) => labRequest.labTest.id === request.labTestId,
+      medicalRecordEntry.labRequests.some((labRequest) =>
+        request.labTestIds.includes(labRequest.labTest.id),
       )
     ) {
-      throw new BadRequestException('Đã yêu cầu xét nghiệm này cho bệnh án này');
+      throw new BadRequestException(
+        'Đã yêu cầu xét nghiệm này cho bệnh án này',
+      );
     }
 
-    const labTest = await this.findOne(request.labTestId);
-    if (!labTest) {
+    const labTests = await Promise.all(
+      request.labTestIds.map((id) => this.findOne(id)),
+    );
+    if (labTests.some((labTest) => !labTest)) {
       throw new NotFoundException('Không tìm thấy xét nghiệm');
     }
 
@@ -138,23 +158,39 @@ export class LabTestService {
         await this.medicalRecordService.saveRecordEntry(medicalRecordEntry);
     }
 
-    const labRequest = new LabRequest();
-    labRequest.labTest = labTest;
-    labRequest.requestDate = new Date();
-    labRequest.status = LabTestStatus.PENDING;
-    labRequest.medicalRecordEntry = medicalRecordEntry;
+    const labRequests = labTests.map((labTest) => {
+      const labRequest = new LabRequest();
+      labRequest.labTest = labTest;
+      labRequest.requestDate = new Date();
+      labRequest.status = LabTestStatus.PENDING;
+      labRequest.medicalRecordEntry = medicalRecordEntry;
+      return labRequest;
+    });
 
     await this.invoiceService.addInvoiceItem({
       invoice_id: medicalRecordEntry.invoice.id,
-      items: [
-        {
-          name: labTest.name,
-          amount: labTest.price,
-          itemType: ItemType.LAB_TEST,
-        },
-      ],
+      items: labTests.map((labTest) => ({
+        name: labTest.name,
+        amount: labTest.price,
+        itemType: ItemType.LAB_TEST,
+      })),
     });
-    return this.labRequestRepository.save(labRequest);
+    const labRequestsCreation =
+      await this.labRequestRepository.save(labRequests);
+    // Generate test result
+    labRequestsCreation.map(async (labRequest) => {
+      const rs = await this.genTestResult.generateTestResult(
+        labRequest.labTest?.name,
+      );
+      const testResult = await this.createTestResult({
+        ...rs,
+        labRequestId: labRequest.id,
+      });
+
+      labRequest.testResult = testResult;
+      return labRequest;
+    });
+    return labRequestsCreation;
   }
 
   async createTestResult(result: TestResultCreationDto): Promise<TestResult> {

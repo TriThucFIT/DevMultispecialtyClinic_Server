@@ -13,6 +13,8 @@ import { Doctor } from 'src/DoctorModule/entities/doctor.entity';
 import { MedicalInformation } from './MedicalInformation.entity';
 import { MedicalRecordEntryStatus } from '../enums/MedicalRecordEntryStatus.enum';
 import { Invoice } from 'src/CasherModule/entities/invoice.entity';
+import { Prescription } from 'src/PharmacistModule/entities/prescription.entity';
+import { Appointment } from 'src/AppointmentModule/entities/appointment.entity';
 
 @Entity('medical_record_entry')
 export class MedicalRecordEntry extends BaseClassProperties {
@@ -22,6 +24,12 @@ export class MedicalRecordEntry extends BaseClassProperties {
     default: MedicalRecordEntryStatus.IN_PROGRESS,
   })
   status: MedicalRecordEntryStatus;
+
+  @Column({
+    type: 'text',
+    nullable: true,
+  })
+  note: string;
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   visitDate: Date;
 
@@ -68,9 +76,28 @@ export class MedicalRecordEntry extends BaseClassProperties {
   })
   labRequests: LabRequest[];
 
+  @OneToMany(
+    () => Prescription,
+    (prescription) => prescription.medicalRecordEntry,
+    {
+      cascade: true,
+    },
+  )
+  prescriptions: Prescription[];
+
   @OneToOne(() => Invoice, (invoice) => invoice.medicalRecordEntry, {
     cascade: true,
     nullable: true,
   })
-  invoice : Invoice
+  invoice: Invoice;
+
+  @OneToOne(() => Appointment, (apoointment) => apoointment.id, {
+    cascade: true,
+    nullable: true,
+  })
+  @JoinColumn({
+    name: 'appointment_id',
+    referencedColumnName: 'id',
+  })
+  appointment: Appointment;
 }

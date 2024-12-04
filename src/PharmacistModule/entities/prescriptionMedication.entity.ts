@@ -5,12 +5,6 @@ import { Medication } from './Medication.entity';
 
 @Entity('prescriptionMedication')
 export class PrescriptionMedication extends BaseClassProperties {
-  @PrimaryColumn()
-  medication_id: number;
-
-  @PrimaryColumn()
-  prescription_id: number;
-
   @ManyToOne(() => Prescription, (prescription) => prescription.id)
   @JoinColumn({ name: 'prescription_id', referencedColumnName: 'id' })
   prescription: Prescription;
@@ -19,7 +13,10 @@ export class PrescriptionMedication extends BaseClassProperties {
   @JoinColumn({ name: 'medication_id', referencedColumnName: 'id' })
   medication: Medication;
 
-  @Column()
+  @Column({
+    type: 'text',
+    nullable: true,
+  })
   note: string;
 
   @Column({

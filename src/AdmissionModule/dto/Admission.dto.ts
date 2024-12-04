@@ -47,6 +47,13 @@ export class PatientSendToQueue {
   address: Address;
   admission: Partial<AddmissionInQueue>;
   invoiceId: number;
+  currentRecord: {
+    id: number;
+    labRequests?: {
+      id: number;
+      status: string;
+    }[];
+  };
 }
 
 class AddmissionInQueue {
@@ -66,7 +73,7 @@ export class InvoiceSendToQueue {
 }
 
 class InvoiceItemQueue {
-  id : number;
+  id: number;
   name: string;
   status: InvoiceStatus;
   quantity?: number;

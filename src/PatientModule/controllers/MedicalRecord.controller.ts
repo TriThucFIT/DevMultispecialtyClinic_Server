@@ -1,8 +1,17 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { MedicalRecordService } from '../services/MedicalRecod.service';
 import {
   MedicalRecordCreation,
   MedicalRecordEntryCreation,
+  MedicalRecordEntryUpdate,
   MedicalRecordResponseDto,
 } from '../dto/patient.dto';
 import { ApiResponseDto } from 'src/Common/DTO/ApiResponse.dto';
@@ -21,19 +30,40 @@ export class MedicalRecordController {
   ): Promise<ApiResponseDto<MedicalRecordResponseDto>> {
     if (recordId) {
       const record = await this.medicalRecordService.findOne(recordId);
+      if (!record) {
+        throw new NotFoundException('Không tìm thấy hồ sơ y tế');
+      }
+
       return {
-        data: plainToClass(MedicalRecordResponseDto, record, {
-          excludeExtraneousValues: true,
-        }),
+        data: plainToClass(
+          MedicalRecordResponseDto,
+          {
+            ...record,
+            entries: record.entries.reverse(),
+          },
+          {
+            excludeExtraneousValues: true,
+          },
+        ),
         message: 'Success',
         statusCode: 200,
       };
     } else if (patientId) {
       const record = await this.medicalRecordService.findByPatientId(patientId);
+      if (!record) {
+        throw new NotFoundException('Không tìm thấy hồ sơ y tế');
+      }
       return {
-        data: plainToClass(MedicalRecordResponseDto, record, {
-          excludeExtraneousValues: true,
-        }),
+        data: plainToClass(
+          MedicalRecordResponseDto,
+          {
+            ...record,
+            entries: record.entries.reverse(),
+          },
+          {
+            excludeExtraneousValues: true,
+          },
+        ),
         message: 'Success',
         statusCode: 200,
       };
@@ -66,6 +96,21 @@ export class MedicalRecordController {
       recordId,
       record,
     );
+    return {
+      data: plainToClass(MedicalRecordResponseDto, recordEntry, {
+        excludeExtraneousValues: true,
+      }),
+      message: 'Success',
+      statusCode: 200,
+    };
+  }
+
+  @Post('entry')
+  async updateRecordEntry(
+    @Body() record: MedicalRecordEntryUpdate,
+  ): Promise<ApiResponseDto<MedicalRecordResponseDto>> {
+    const recordEntry =
+      await this.medicalRecordService.updateRecordEntry(record);
     return {
       data: plainToClass(MedicalRecordResponseDto, recordEntry, {
         excludeExtraneousValues: true,

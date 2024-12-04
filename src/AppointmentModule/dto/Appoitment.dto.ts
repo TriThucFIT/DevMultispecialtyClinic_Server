@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { IsString, Matches, ValidateNested } from 'class-validator';
 import { DoctorAppointmentDto } from 'src/DoctorModule/dto/doctor.dto';
 import { PatientCreationDto } from 'src/PatientModule/dto/patient.dto';
@@ -18,4 +18,27 @@ export class CreateAppointmentDto {
   @ValidateNested()
   @Type(() => PatientCreationDto)
   patient: PatientCreationDto;
+  medicalRecordEntryId?: number;
+}
+export class AppointmentResponseDto {
+  @Expose()
+  id: number;
+  @Expose()
+  date: string;
+  @Expose()
+  time: string;
+  @Expose()
+  symptoms: string;
+  @Expose()
+  isWalkIn: boolean;
+  @Expose()
+  status: string;
+  @Expose()
+  service: string;
+  @Expose()
+  @Type(() => PatientCreationDto)
+  patient: PatientCreationDto;
+  @Expose()
+  @Type(() => DoctorAppointmentDto)
+  doctor: DoctorAppointmentDto;
 }

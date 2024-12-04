@@ -47,3 +47,20 @@ export class LabTestResponseDTO extends BaseDTO {
   @Type(() => DoctorResponseDto)
   doctor: DoctorResponseDto;
 }
+
+export class TestResultResponseDTO extends BaseDTO {
+  @Expose()
+  result: string;
+  @Expose()
+  detail: Record<string, any>[];
+  @Expose()
+  notes: string;
+  @Expose()
+  images: string[];
+}
+
+export class LabResults {
+  id: string;
+  name: string;
+  testResults: TestResultResponseDTO[];
+}

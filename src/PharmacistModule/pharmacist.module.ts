@@ -1,11 +1,16 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PharmacistService } from './pharmacist.service';
+import { PharmacistService } from './services/pharmacist.service';
 import { PharmacistController } from './controllers/pharmacist.controller';
 import { Pharmacist } from './entities/pharmacist.entity';
 import { Medication } from './entities/Medication.entity';
 import { Prescription } from './entities/prescription.entity';
 import { PrescriptionMedication } from './entities/prescriptionMedication.entity';
+import { CasherModule } from 'src/CasherModule/casher.module';
+import { DoctorModule } from 'src/DoctorModule/doctor.module';
+import { PatientModule } from 'src/PatientModule/patient.module';
+import { MedicationController } from './controllers/Medication.controller';
+import { MedicationService } from './services/Medication.service';
 
 @Module({
   imports: [
@@ -15,6 +20,9 @@ import { PrescriptionMedication } from './entities/prescriptionMedication.entity
       PrescriptionMedication,
       Prescription,
     ]),
+    CasherModule,
+    DoctorModule,
+    PatientModule,
   ],
   providers: [
     PharmacistService,
@@ -23,8 +31,9 @@ import { PrescriptionMedication } from './entities/prescriptionMedication.entity
     Prescription,
     PrescriptionMedication,
     Pharmacist,
+    MedicationService
   ],
-  controllers: [PharmacistController],
+  controllers: [PharmacistController, MedicationController],
   exports: [
     PharmacistService,
     PharmacistController,

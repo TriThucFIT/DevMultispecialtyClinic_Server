@@ -17,13 +17,13 @@ import { AuthModule } from './AuthenticationModule/auth.module';
 @Module({
   imports: [
     ActiveMQModule,
-    AdmissionModule,
     AppointmentModule,
+    PatientModule,
+    AdmissionModule,
     AuthModule,
     CasherModule,
     DoctorModule,
     LabTestModule,
-    PatientModule,
     PharmacistModule,
     ReceptionistModule,
 

@@ -1,21 +1,182 @@
-{
-  "id": "XRay",
-  "name": "Chụp X Quang Tim, Phổi",
-  "testResults": {
-    "result": "Bất thường nhẹ",
-    "detail": [
-      {
-        "name": "Phổi",
-        "description": "Có dấu hiệu tổn thương nhẹ ở phổi phải.",
-        "status": "Bất thường"
-      },
-      {
-        "name": "Tim",
-        "description": "Tim có kích thước bình thường.",
-        "status": "Bình thường"
-      }
-    ],
-    "notes": "Cần kiểm tra thêm để xác định nguyên nhân.",
-    "images": ["https://example.com/xray2.jpg"]
+[
+  {
+    "name": "Paracetamol",
+    "dosage": "500mg",
+    "unitPrice": 2000,
+    "unitStock": "viên",
+    "image": "https://media.gettyimages.com/id/157402355/photo/generic-paracetamol-isolated-on-white.jpg?s=612x612&w=0&k=20&c=2E3oCvsuOhbB8jmDmDgIFrPDg_FLyEvp-K0IdvGagaw=",
+    "description": "Hạ sốt, giảm đau cho các trường hợp đau đầu, đau cơ, cảm cúm.",
+    "usage": "2 viên/lần, 3 lần/ngày sau ăn."
+  },
+  {
+    "name": "Amoxicillin",
+    "dosage": "250mg",
+    "unitPrice": 5000,
+    "unitStock": "viên nang",
+    "image": "https://www.vinmec.com/static/uploads/20221218_024600_605145_thuoc_thuoc_Amoxici_max_1800x1800_jpg_937d54ede8.jpg",
+    "description": "Kháng sinh điều trị nhiễm trùng đường hô hấp, tai mũi họng, tiết niệu.",
+    "usage": "1 viên/lần, 2 lần/ngày trước ăn."
+  },
+  {
+    "name": "Ibuprofen",
+    "dosage": "400mg",
+    "unitPrice": 3000,
+    "unitStock": "viên",
+    "image": "https://cdn.benhvienthucuc.vn/wp-content/uploads/2024/03/ibuprofen-400mg.jpg",
+    "description": "Giảm đau, kháng viêm, điều trị đau khớp, đau cơ và hạ sốt.",
+    "usage": "1 viên/lần, 3 lần/ngày sau ăn."
+  },
+  {
+    "name": "Cetrizine",
+    "dosage": "10mg",
+    "unitPrice": 1500,
+    "unitStock": "viên",
+    "image": "https://nhathuocanphuoc.com.vn/upload/product/thuoc-ceritine-10mg-cetirizine-hop-100-vien-6332.jpg",
+    "description": "Điều trị dị ứng, mề đay, viêm mũi dị ứng theo mùa.",
+    "usage": "1 viên/lần, 1 lần/ngày vào buổi tối."
+  },
+  {
+    "name": "Azithromycin",
+    "dosage": "500mg",
+    "unitPrice": 10000,
+    "unitStock": "viên",
+    "image": "https://5.imimg.com/data5/SELLER/Default/2024/3/398311559/LE/KV/IC/214640032/azithromycin-tablet-500x500.jpg",
+    "description": "Kháng sinh điều trị nhiễm trùng đường hô hấp, da, mô mềm.",
+    "usage": "1 viên/lần, 1 lần/ngày trước ăn."
+  },
+  {
+    "name": "Loratadine",
+    "dosage": "10mg",
+    "unitPrice": 1800,
+    "unitStock": "viên",
+    "image": "https://cdn.thegioididong.com/Products/Images/10036/246943/pms-loratadin-10mg-mac-dinh-2.jpg",
+    "description": "Giảm triệu chứng dị ứng như ngứa, chảy nước mũi, mề đay.",
+    "usage": "1 viên/lần, 1 lần/ngày vào buổi sáng."
+  },
+  {
+    "name": "Metformin",
+    "dosage": "500mg",
+    "unitPrice": 2500,
+    "unitStock": "viên",
+    "image": "https://tipharco.vn/Data/Sites/1/News/2961/metformin-500mg_w.jpg",
+    "description": "Điều trị tiểu đường type 2, giúp giảm đường huyết hiệu quả.",
+    "usage": "1 viên/lần, 2 lần/ngày sau ăn."
+  },
+  {
+    "name": "Simvastatin",
+    "dosage": "20mg",
+    "unitPrice": 3000,
+    "unitStock": "viên",
+    "image": "https://nhathuocanphuoc.com.vn/upload/product/thuoc-ha-lipid-mau-simvastatin-stella-20mg-2375.jpg",
+    "description": "Điều trị mỡ máu cao, giảm cholesterol xấu trong cơ thể.",
+    "usage": "1 viên/lần, 1 lần/ngày vào buổi tối sau ăn."
+  },
+  {
+    "name": "Aspirin",
+    "dosage": "81mg",
+    "unitPrice": 1000,
+    "unitStock": "viên",
+    "image": "https://example.com/images/aspirin.jpg",
+    "description": "Ngăn ngừa đông máu, điều trị đau nhức, viêm khớp nhẹ.",
+    "usage": "1 viên/lần, 1 lần/ngày sau ăn."
+  },
+  {
+    "name": "Omeprazole",
+    "dosage": "20mg",
+    "unitPrice": 5000,
+    "unitStock": "viên nang",
+    "image": "https://cdn.thegioididong.com/Products/Images/10039/224311/omeprazol-20mg-dhg-h-30vien-2-1.jpg",
+    "description": "Điều trị loét dạ dày, trào ngược dạ dày thực quản.",
+    "usage": "1 viên/lần, 1 lần/ngày trước bữa sáng."
+  },
+  {
+    "name": "Prednisolone",
+    "dosage": "5mg",
+    "unitPrice": 2000,
+    "unitStock": "viên",
+    "image": "https://shipthuocnhanh.vn/images/products/2023/05/07/3-332.png",
+    "description": "Giảm viêm, điều trị các bệnh tự miễn và dị ứng nặng.",
+    "usage": "2 viên/lần, 1 lần/ngày sau ăn sáng."
+  },
+  {
+    "name": "Clarithromycin",
+    "dosage": "500mg",
+    "unitPrice": 12000,
+    "unitStock": "viên",
+    "image": "https://www.vinmec.com/static/uploads/20220116_021334_207692_clarithromycin_500m_max_1800x1800_jpg_f63febd0bb.jpg",
+    "description": "Kháng sinh điều trị nhiễm trùng đường hô hấp và tiêu hóa.",
+    "usage": "1 viên/lần, 2 lần/ngày trước ăn."
+  },
+  {
+    "name": "Diclofenac",
+    "dosage": "50mg",
+    "unitPrice": 2500,
+    "unitStock": "viên",
+    "image": "https://bizweb.dktcdn.net/thumb/1024x1024/100/404/633/products/diclo-50.jpg?v=1682156849030",
+    "description": "Giảm đau, kháng viêm trong các bệnh về xương khớp.",
+    "usage": "1 viên/lần, 2 lần/ngày sau ăn."
+  },
+  {
+    "name": "Salbutamol",
+    "dosage": "2mg",
+    "unitPrice": 1000,
+    "unitStock": "viên",
+    "image": "https://trungtamthuoc.com/images/products/salbutamol-2mg-pharbaco-4-o6460.jpg",
+    "description": "Điều trị hen suyễn, giãn phế quản, khó thở do co thắt.",
+    "usage": "1 viên/lần, 3 lần/ngày trước ăn."
+  },
+  {
+    "name": "Tetracycline",
+    "dosage": "250mg",
+    "unitPrice": 2000,
+    "unitStock": "viên",
+    "image": "https://iris-buck.s3.ap-southeast-1.amazonaws.com/production/ca51bebc-1b3f-4667-9ad1-27d602475cdc.jpeg",
+    "description": "Kháng sinh điều trị nhiễm trùng da, đường tiết niệu, đường hô hấp.",
+    "usage": "1 viên/lần, 2 lần/ngày trước ăn."
+  },
+  {
+    "name": "Furosemide",
+    "dosage": "40mg",
+    "unitPrice": 1500,
+    "unitStock": "viên",
+    "image": "https://nhathuocanphuoc.com.vn/thumbs/735x705x2/upload/product/thuoc-furosemide-40mg-6540.jpg",
+    "description": "Thuốc lợi tiểu, điều trị phù nề, huyết áp cao.",
+    "usage": "1 viên/lần, 1 lần/ngày vào buổi sáng trước ăn."
+  },
+  {
+    "name": "Atorvastatin",
+    "dosage": "10mg",
+    "unitPrice": 3500,
+    "unitStock": "viên",
+    "image": "https://domesco.com/pictures/catalog/products/sanpham2020/19-08-20/16.-Atorvastatin-10-mg-hop10-vi-x-10-vien-nen-bao-phm-.png",
+    "description": "Giảm mỡ máu, ngăn ngừa các bệnh tim mạch liên quan.",
+    "usage": "1 viên/lần, 1 lần/ngày vào buổi tối sau ăn."
+  },
+  {
+    "name": "Doxycycline",
+    "dosage": "100mg",
+    "unitPrice": 5000,
+    "unitStock": "viên",
+    "image": "https://www.vinmec.com/static/uploads/20220511_081406_321618_doxycyclin_100mg_max_1800x1800_png_67e932c82b.png",
+    "description": "Kháng sinh điều trị nhiễm trùng hô hấp, da, tiết niệu.",
+    "usage": "1 viên/lần, 1 lần/ngày trước ăn."
+  },
+  {
+    "name": "Ranitidine",
+    "dosage": "150mg",
+    "unitPrice": 2500,
+    "unitStock": "viên",
+    "image": "https://www.vinmec.com/static/uploads/20220426_012458_565145_thuoc_Ranitidine_max_1800x1800_png_0b18a10eac.png",
+    "description": "Điều trị loét dạ dày, giảm acid trong dạ dày.",
+    "usage": "1 viên/lần, 2 lần/ngày trước ăn."
+  },
+  {
+    "name": "Chlorpheniramine",
+    "dosage": "4mg",
+    "unitPrice": 800,
+    "unitStock": "viên",
+    "image": "https://www.vinmec.com/static/uploads/20221006_101856_366002_thuoc_Chlorphenira_max_1800x1800_png_5d18fea9ce.png",
+    "description": "Điều trị dị ứng, giảm ngứa, chảy nước mũi, hắt hơi.",
+    "usage": "1 viên/lần, 2 lần/ngày sau ăn."
   }
-}
+]

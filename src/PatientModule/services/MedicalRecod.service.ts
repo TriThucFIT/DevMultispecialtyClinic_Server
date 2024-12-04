@@ -4,13 +4,14 @@ import { Repository } from 'typeorm';
 import {
   MedicalRecordCreation,
   MedicalRecordEntryCreation,
+  MedicalRecordEntryUpdate,
 } from '../dto/patient.dto';
 import { PatientService } from './patient.service';
 import { NotFoundException } from '@nestjs/common';
 import { MedicalRecordEntry } from '../entities/MedicalRecordEntry.entity';
 import { DoctorService } from 'src/DoctorModule/doctor.service';
 import { error } from 'console';
-import { InvoiceService } from 'src/CasherModule/services/Invoice.service';
+import { MedicalRecordEntryStatus } from '../enums/MedicalRecordEntryStatus.enum';
 
 export class MedicalRecordService {
   constructor(
@@ -33,6 +34,9 @@ export class MedicalRecordService {
         'entries.labRequests',
         'entries.labRequests.labTest',
         'entries.labRequests.testResult',
+        'entries.prescriptions.medications',
+        'entries.prescriptions.medications.medication',
+        'entries.appointment',
       ],
     });
   }
@@ -48,6 +52,8 @@ export class MedicalRecordService {
         'entries.labRequests',
         'entries.labRequests.labTest',
         'entries.labRequests.testResult',
+        'entries.prescriptions.medications',
+        'entries.appointment',
       ],
     });
   }
@@ -128,9 +134,9 @@ export class MedicalRecordService {
       recordEntry.medicalRecord = record;
       recordEntry.symptoms = entry.symptoms;
       recordEntry.visitDate = new Date();
-      recordEntry.doctor = await this.doctorService.findByEmployeeId(
-        entry.doctorId,
-      );
+      recordEntry.doctor = entry.doctorId
+        ? await this.doctorService.findByEmployeeId(entry.doctorId)
+        : null;
       const newEntry =
         await this.medicalRecordEntryRepository.save(recordEntry);
       record.entries = record.entries?.concat(newEntry) || [newEntry];
@@ -144,5 +150,23 @@ export class MedicalRecordService {
 
   async saveRecordEntry(recordEntry: MedicalRecordEntry) {
     return this.medicalRecordEntryRepository.save(recordEntry);
+  }
+
+  async updateRecordEntry(entry: MedicalRecordEntryUpdate) {
+    try {
+      const medicalRecordEntry = await this.findRecordEntry(
+        entry.medicalRecordEntryId,
+      );
+      if (!medicalRecordEntry) {
+        throw new NotFoundException('Không tìm thấy hồ sơ bệnh án');
+      }
+      medicalRecordEntry.diagnosis = entry.diagnosis;
+      medicalRecordEntry.treatmentPlan = entry.treatmentPlan;
+      medicalRecordEntry.note = entry.additionalNote;
+      medicalRecordEntry.status = MedicalRecordEntryStatus.COMPLETED;
+      return this.medicalRecordEntryRepository.save(medicalRecordEntry);
+    } catch (error) {
+      throw error;
+    }
   }
 }
