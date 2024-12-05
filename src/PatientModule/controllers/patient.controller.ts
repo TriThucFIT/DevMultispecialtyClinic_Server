@@ -1,7 +1,6 @@
 import { Body, Controller, Get, Param, Put, Query } from '@nestjs/common';
 import { PatientService } from '../services/patient.service';
 import { Public } from 'src/Decorators/public.decorator';
-import { log } from 'console';
 import { PatientResponseDto, PatientUpdateDto } from '../dto/patient.dto';
 import { ApiResponseDto } from 'src/Common/DTO/ApiResponse.dto';
 import { plainToClass } from 'class-transformer';

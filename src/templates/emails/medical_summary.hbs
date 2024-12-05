@@ -1,0 +1,103 @@
+<html lang='vi'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Tóm Tắt Y Khoa</title>
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333;
+      margin: 0; padding: 0; } .container { padding: 20px; max-width: 800px;
+      margin: 0 auto; border: 1px solid #ddd; border-radius: 8px;
+      background-color: #f9f9f9; } .header { text-align: center; margin-bottom:
+      20px; } .header h1 { color: #007BFF; } .section { margin-bottom: 20px; }
+      .section h2 { color: #007BFF; border-bottom: 2px solid #007BFF;
+      padding-bottom: 5px; } table { width: 100%; border-collapse: collapse;
+      margin-top: 10px; } table, th, td { border: 1px solid #ddd; } th, td {
+      padding: 10px; text-align: left; } th { background-color: #007BFF; color:
+      white; }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      <div class='header'>
+        <h1>Tóm Tắt Y Khoa</h1>
+        <p>Cảm ơn quý khách đã đến khám tại phòng khám của chúng tôi. Dưới đây
+          là tóm tắt thông tin từ lần khám vừa qua.</p>
+      </div>
+
+      <div class='section'>
+        <h2>Thông Tin Chung</h2>
+        <p><strong>Ngày khám:</strong> {{visitDate}}</p>
+        <p><strong>Triệu chứng:</strong> {{symptoms}}</p>
+        <p><strong>Chẩn đoán:</strong> {{diagnosis}}</p>
+        <p><strong>Kế hoạch điều trị:</strong> {{treatmentPlan}}</p>
+        <p><strong>Bác sĩ phụ trách:</strong>
+          {{doctorName}}
+          (SĐT:
+          {{doctorPhone}})</p>
+        <p><strong>Ghi chú:</strong> {{note}}</p>
+      </div>
+
+      {{#if labRequests}}
+        <div class='section'>
+          <h2>Kết Quả Xét Nghiệm</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Tên Xét Nghiệm</th>
+                <th>Kết Quả</th>
+                <th>Ghi Chú</th>
+                <th>Giá tiền</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each labRequests}}
+                <tr>
+                  <td>{{name}}</td>
+                  <td>{{result}}</td>
+                  <td>{{notes}}</td>
+                  <td>{{price}}</td>
+                </tr>
+              {{/each}}
+              <tr>
+                <td colspan='3'><strong>Tổng cộng:</strong></td>
+                <td><strong>{{totalAmountLabTests}}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      {{/if}}
+
+      {{#if prescriptions}}
+        <div class='section'>
+          <h2>Danh Sách Thuốc</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Tên Thuốc</th>
+                <th>Liều Dùng</th>
+                <th>Cách Sử Dụng</th>
+                <th>Số Lượng</th>
+                <th>Ghi Chú</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each prescriptions}}
+                <tr>
+                  <td>{{name}}</td>
+                  <td>{{dosage}}</td>
+                  <td>{{usage}}</td>
+                  <td>{{quantity}} {{unitStock}}</td>
+                  <td>{{note}}</td>
+                </tr>
+              {{/each}}
+              <tr>
+                <td colspan='4'><strong>Tổng cộng:</strong></td>
+                <td><strong>{{totalAmountPrescriptions}}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      {{/if}}
+    </div>
+  </body>
+</html>

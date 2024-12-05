@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
-  MedicalRecordCreation,
   PatientCreationDto,
   PatientResponseDto,
   PatientUpdateDto,
@@ -9,7 +8,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Patient } from '../entities/patient.entity';
 import { Like, Repository } from 'typeorm';
 import { log } from 'console';
-import { MedicalRecord } from '../entities/MedicalRecord.entity';
 
 @Injectable()
 export class PatientService {
@@ -109,6 +107,7 @@ export class PatientService {
   async findByPhoneAndName(phone: string, fullName: string): Promise<Patient> {
     const patient = await this.patientRepository.findOne({
       where: { phone, fullName },
+      relations: ['account'],
     });
 
     if (!patient) {
@@ -137,7 +136,6 @@ export class PatientService {
   }
 
   async update(id: number | string, patient: Partial<PatientUpdateDto>) {
-    log('update', patient);
     const patientToUpdate = await this.patientRepository.findOne({
       where: typeof id === 'string' ? { patientId: id } : { id },
       relations: ['account'],
