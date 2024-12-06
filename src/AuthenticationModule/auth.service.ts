@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -9,7 +10,7 @@ import { RoleRepository } from './repositories/role.repository';
 import { RoleName } from 'src/Common/Enums/auth.enum';
 import {
   CreateAccountDto,
-  CreateBlankAccountDto,
+  CreatePatientAccountDto,
   CreateRoleDto,
   SignInDto,
 } from './dto/auth.request.dto';
@@ -21,6 +22,7 @@ import { Permission } from './entities/permission.entity';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CasherService } from 'src/CasherModule/casher.service';
+import { PatientService } from 'src/PatientModule/services/patient.service';
 import { PharmacistService } from 'src/PharmacistModule/services/pharmacist.service';
 
 @Injectable()
@@ -34,6 +36,7 @@ export class AuthService {
     private doctorService: DoctorService,
     private receptionistService: ReceptionistService,
     private casherService: CasherService,
+    private patientService: PatientService,
     private pharmacistService: PharmacistService,
   ) {}
 
@@ -55,6 +58,8 @@ export class AuthService {
     };
   }
   async createAccount(createUserDto: CreateAccountDto) {
+    console.log('createUserDto', createUserDto);
+
     try {
       if (!createUserDto.department) {
         throw new Error('Department is required');
@@ -75,6 +80,8 @@ export class AuthService {
       roles.forEach((role) => {
         this.userService.setRole(user.username, role);
       });
+
+      console.log('roles', roles);
 
       switch (createUserDto.department) {
         case RoleName.Doctor:
@@ -111,6 +118,62 @@ export class AuthService {
     } catch (error) {
       throw new Error(error);
     }
+  }
+
+  async createPatientAccount(createPatientAccountDto: CreatePatientAccountDto) {
+    await this.checkUsernameExist(createPatientAccountDto.username);
+    const patient = await this.checkPatientId(
+      createPatientAccountDto.patient.patientId,
+    );
+
+    const roles = await this.roleService.findByNamesOrIds([RoleName.Patient]);
+    createPatientAccountDto.roles = [RoleName.Patient];
+    const account = await this.userService.create(createPatientAccountDto);
+
+    this.userService.setRole(createPatientAccountDto.username, roles[0]);
+
+    patient.account = account;
+    await this.patientService.updateAccount(patient.id, patient);
+    return patient;
+  }
+
+  async checkUsernameExist(username: string) {
+    const account = await this.userService.findOne(username);
+    console.log('account', account);
+
+    if (account) {
+      throw new BadRequestException({
+        code: 400,
+        message: 'Tên đăng nhập đã tồn tại',
+      });
+    }
+    return {
+      code: 200,
+      message: 'Tên đăng nhập hợp lệ',
+    };
+  }
+
+  async checkPatientId(patientId: string) {
+    const patient = await this.patientService.findOne(patientId);
+    const isValidPatientId = /^PAT\d{2,}$/.test(patientId);
+    console.log('patient', patient);
+
+    if (!isValidPatientId) {
+      throw new BadRequestException({
+        message: 'Mã bệnh nhân không hợp lệ',
+      });
+    }
+    if (!patient) {
+      throw new NotFoundException({
+        message: 'Mã bệnh nhân không tồn tại',
+      });
+    }
+    if (patient.account) {
+      throw new BadRequestException({
+        message: 'Tài khoản đã tồn tại',
+      });
+    }
+    return patient;
   }
 
   async setRoles(username: string, roles: RoleName[]) {
@@ -213,7 +276,12 @@ export class AuthService {
           ...accountResponse,
           ...casher,
         });
-
+      case RoleName.Patient:
+        const patient = await this.patientService.findByAccount(account.id);
+        return UserProfileDTO.plainToInstance({
+          ...accountResponse,
+          ...patient,
+        });
       case RoleName.Pharmacist:
         const pharmacist = await this.pharmacistService.findByAccount(
           account.id,

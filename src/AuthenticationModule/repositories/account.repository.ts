@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Account } from '../entities/account.entity';
 import { Role } from '../entities/role.entity';
-import { CreateAccountDto } from '../dto/auth.request.dto';
+import { CreateAccountDto, CreatePatientAccountDto } from '../dto/auth.request.dto';
 import { Permission } from '../entities/permission.entity';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class AccountRepository {
     });
   }
 
-  async create(createAccount: CreateAccountDto): Promise<Account> {
+  async create(createAccount: CreateAccountDto | CreatePatientAccountDto): Promise<Account> {
     const account = new Account();
     account.username = createAccount.username;
     account.password = createAccount.password;

@@ -66,8 +66,12 @@ export class PatientService {
     );
   }
 
-  async findOne(patient_id: string) {
-    return this.patientRepository.findOne({ where: { patientId: patient_id } });
+  async findOne(patientId: string): Promise<Patient> {
+    const patients = await this.patientRepository.findOne({
+      where: { patientId },
+      relations: ['account'],
+    });
+    return patients;
   }
 
   async findByPhone(phone: string): Promise<PatientResponseDto[]> {
@@ -83,6 +87,7 @@ export class PatientService {
           patientWithMail = {
             ...patient,
             email: account.email,
+            accountId: account.id,
           };
         }
         return PatientResponseDto.plainToInstance(patientWithMail || patient);
@@ -126,6 +131,16 @@ export class PatientService {
     return patients[0];
   }
 
+  async findByAccount(accountId: number): Promise<Patient> {
+    const patient = await this.patientRepository.findOne({
+      where: { account: { id: accountId } },
+    });
+    if (!patient) {
+      throw new NotFoundException('Không tìm thấy bệnh nhân');
+    }
+    return patient;
+  }
+
   async create(patient: PatientCreationDto) {
     const patientNew = new Patient();
     Object.assign(patientNew, patient);
@@ -140,14 +155,27 @@ export class PatientService {
       where: typeof id === 'string' ? { patientId: id } : { id },
       relations: ['account'],
     });
+    console.log('patientToUpdate', patientToUpdate);
+
     if (!patientToUpdate) {
       throw new NotFoundException('Không tìm thấy bệnh nhân');
     }
+
     return this.patientRepository.save({
       ...patientToUpdate,
       ...patient,
       account: { email: patient?.email ?? patientToUpdate.account?.email },
     });
+  }
+
+  async updateAccount(id: number | string, patient: PatientCreationDto) {
+    const patientToUpdate = await this.patientRepository.findOne({
+      where: typeof id === 'string' ? { patientId: id } : { id },
+    });
+    if (!patientToUpdate) {
+      throw new NotFoundException('Không tìm thấy bệnh nhân');
+    }
+    return this.patientRepository.save({ ...patientToUpdate, ...patient });
   }
 
   async updateByPhoneAndName(
