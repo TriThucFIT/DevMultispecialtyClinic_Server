@@ -1,0 +1,91 @@
+<html lang='vi'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Xác nhận Đặt Lịch</title>
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+      .container { width: 90%; max-width: 1200px; margin: 0 auto; padding: 20px;
+      border: 1px solid #ddd; border-radius: 8px; } .header { text-align:
+      center; background-color: #007bff; color: #fff; padding: 15px 0;
+      border-radius: 8px 8px 0 0; } .section { margin-top: 20px; } .section h2 {
+      margin-bottom: 10px; color: #007bff; } .section-content { display: flex;
+      justify-content: space-between; gap: 20px; } .section-content .column {
+      flex: 1; } .section-content p { margin: 5px 0; } table { width: 100%;
+      border-collapse: collapse; margin-top: 10px; } table th, table td {
+      border: 1px solid #ddd; padding: 10px; text-align: left; } table th {
+      background-color: #f4f4f4; }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      <div class='header'>
+        <h1>Xác Nhận Đặt Lịch Hẹn</h1>
+      </div>
+
+      <div class='section'>
+        <div class='section-content'>
+          <div class='column'>
+            <h2>Thông Tin Bệnh Nhân</h2>
+            <p><strong>Họ và Tên:</strong> {{patient.fullName}}</p>
+            <p><strong>Giới Tính:</strong>
+              {{#if patient.gender}}Nam{{else}}Nữ{{/if}}
+            </p>
+            <p><strong>Ngày Sinh:</strong> {{patient.dob}}</p>
+            <p><strong>Địa Chỉ:</strong>
+              {{patient.address.address}},
+              {{patient.address.state}},
+              {{patient.address.city}}
+            </p>
+            <p><strong>Số Điện Thoại:</strong> {{patient.phone}}</p>
+          </div>
+
+          <div class='column'>
+            <h2>Thông Tin Lịch Hẹn</h2>
+            <p><strong>Ngày Hẹn:</strong> {{date}}</p>
+            <p><strong>Giờ Hẹn:</strong> {{time}}</p>
+            <p><strong>Triệu Chứng:</strong> {{symptoms}}</p>
+            <p><strong>Trạng Thái:</strong> {{status}}</p>
+            <p><strong>Tên Bác Sĩ:</strong> {{doctor.fullName}}</p>
+            <p><strong>Chuyên Khoa:</strong> {{doctor.specialization}}</p>
+            <p><strong>Liên Hệ:</strong> {{doctor.phone}}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class='section'>
+        <h2>Thông Tin Dịch Vụ</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Tên Dịch Vụ</th>
+              <th>Giá</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{service.name}}</td>
+              <td>{{service.price}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class='section' style='margin-top: 20px;'>
+        <p style='text-align: center; font-weight: bold;'>
+          Xin cảm ơn quý khách đã sử dụng dịch vụ của chúng tôi!
+        </p>
+        <p
+          style='text-align: center; font-weight: lighter; font-style: italic;'
+        >
+          Lưu ý : Bạn vui lòng đến check-in đúng ngày
+          <strong>
+            {{date}}
+          </strong>
+          và giờ hẹn. Hệ thống sẽ tự động hủy lịch hẹn nếu bạn không đến
+          check-in đúng ngày. Cảm ơn bạn!
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

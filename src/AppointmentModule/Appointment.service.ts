@@ -14,9 +14,11 @@ import { ServiceTypeService } from 'src/CasherModule/services/ServiceType.servic
 import { PatientService } from 'src/PatientModule/services/patient.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { log } from 'console';
 import { AppointmentStatus } from './enums/AppointmentStatus.enum';
 import { MedicalRecordService } from 'src/PatientModule/services/MedicalRecod.service';
+import { CustomMailerService } from 'src/MailerModule/MailerModule.service';
+import { AppointmentComfirmation } from 'src/MailerModule/types';
+import { log } from 'console';
 
 @Injectable()
 export class AppointmentService {
@@ -27,6 +29,7 @@ export class AppointmentService {
     private readonly patientService: PatientService,
     private readonly serviceTypeType: ServiceTypeService,
     private readonly medicalRecordService: MedicalRecordService,
+    private readonly mailService: CustomMailerService,
   ) {}
 
   async findAll() {
@@ -104,7 +107,6 @@ export class AppointmentService {
     });
   }
   async findByDate(date: Date) {
-    log('date', date);
     const appointments = await this.appointmentRepository.find({
       where: { date },
       relations: [
@@ -131,62 +133,118 @@ export class AppointmentService {
   }
 
   async create(appointment: CreateAppointmentDto) {
-    const apm = new Appointment();
-
-    if (appointment.doctor) {
-      const doctor = await this.doctorService.findByNameAndSpecialty(
-        appointment.doctor.name,
-        appointment.doctor.specialization,
-      );
-
-      if (doctor) {
-        apm.doctor = doctor;
-      } else {
-        throw new NotFoundException('Không tìm thấy bác sĩ');
-      }
-    }
-    if (appointment.service) {
-      const serviceType = await this.serviceTypeType.findByName(
-        appointment.service,
-      );
-
-      if (serviceType) {
-        apm.service = serviceType;
-      } else {
-        throw new NotFoundException('Không tìm thấy dịch vụ');
-      }
-    }
     try {
-      const patient = await this.patientService.updateByPhoneAndName(
-        appointment.patient.phone,
-        appointment.patient.fullName,
-        appointment.patient,
-      );
-      if (patient) {
-        apm.patient = patient;
-      } else {
+      const apm = new Appointment();
+      if (appointment.doctor) {
+        const doctor = await this.doctorService.findByNameAndSpecialty(
+          appointment.doctor.name,
+          appointment.doctor.specialization,
+        );
+
+        if (doctor) {
+          apm.doctor = doctor;
+        } else {
+          throw new NotFoundException('Không tìm thấy bác sĩ');
+        }
+      }
+      if (appointment.service) {
+        const serviceType = await this.serviceTypeType.findByName(
+          appointment.service,
+        );
+
+        if (serviceType) {
+          apm.service = serviceType;
+        } else {
+          throw new NotFoundException('Không tìm thấy dịch vụ');
+        }
+      }
+      try {
+        const patient = await this.patientService.updateByPhoneAndName(
+          appointment.patient.phone,
+          appointment.patient.fullName,
+          appointment.patient,
+        );
+        if (patient) {
+          apm.patient = patient;
+        } else {
+          const newPatient = await this.patientService.create(
+            appointment.patient,
+          );
+          apm.patient = newPatient;
+        }
+      } catch (error) {
         const newPatient = await this.patientService.create(
           appointment.patient,
         );
         apm.patient = newPatient;
       }
-    } catch (error) {
-      const newPatient = await this.patientService.create(appointment.patient);
-      apm.patient = newPatient;
-    }
-    apm.date = appointment.date;
-    apm.time = appointment.time;
-    apm.symptoms = appointment.symptoms;
+      apm.date = appointment.date;
+      apm.time = appointment.time;
+      apm.symptoms = appointment.symptoms;
 
-    const newAppointment = await this.appointmentRepository.save(apm);
-    if(appointment.medicalRecordEntryId){
-      const medicalRecordEntry = await this.medicalRecordService.findRecordEntry(appointment.medicalRecordEntryId);
-      if(medicalRecordEntry){
-        medicalRecordEntry.appointment = newAppointment;
-        await this.medicalRecordService.saveRecordEntry(medicalRecordEntry);
+      const newAppointment = await this.appointmentRepository.save(apm);
+      if (appointment.medicalRecordEntryId) {
+        const medicalRecordEntry =
+          await this.medicalRecordService.findRecordEntry(
+            appointment.medicalRecordEntryId,
+          );
+        if (medicalRecordEntry) {
+          medicalRecordEntry.appointment = newAppointment;
+          await this.medicalRecordService.saveRecordEntry(medicalRecordEntry);
+        }
       }
+      log(newAppointment);
+
+      if (newAppointment.patient?.account?.email || appointment.patient.email) {
+        const confirmation_mail: AppointmentComfirmation = {
+          id: newAppointment.id,
+          date: new Date(newAppointment.date).toLocaleDateString('vi-VN'),
+          time: newAppointment.time,
+          doctor: {
+            fullName: newAppointment.doctor?.fullName,
+            phone: newAppointment.doctor?.phone,
+            specialization: newAppointment.doctor?.specialization?.name,
+          },
+          isWalkIn: newAppointment.isWalkIn,
+          status: newAppointment.status,
+          symptoms: newAppointment.symptoms,
+          service: {
+            id: newAppointment.service?.id,
+            name: newAppointment.service?.description,
+            price: newAppointment.service?.price,
+          },
+          patient: {
+            id: newAppointment.patient?.patientId,
+            fullName: newAppointment.patient?.fullName,
+            address: {
+              city: newAppointment.patient?.address?.city,
+              state: newAppointment.patient?.address?.state,
+              address: newAppointment.patient?.address?.address,
+            },
+            phone: newAppointment.patient?.phone,
+            age: newAppointment.patient?.age,
+            dob: newAppointment.patient?.dob
+              ? new Date(newAppointment.patient?.dob).toLocaleDateString(
+                  'vi-VN',
+                )
+              : '',
+            gender: newAppointment.patient?.gender,
+            priority: newAppointment.patient?.priority,
+            email: newAppointment.patient?.account?.email ?? appointment.patient.email,
+          },
+        };
+
+        await this.mailService.sendAppointmentConfirmation(
+          confirmation_mail.patient.email,
+          confirmation_mail,
+        );
+      }
+
+      return newAppointment;
+    } catch (error) {
+      Logger.error(error);
+      throw error;
     }
-    return newAppointment
   }
 
   async cancelAppointment(id: number) {

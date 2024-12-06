@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { MedicalRecordSumary } from './types';
+import { AppointmentComfirmation } from './types/Appointment.type';
 
 @Injectable()
 export class CustomMailerService {
@@ -36,5 +37,36 @@ export class CustomMailerService {
       console.error('Failed to send email:', error);
       throw error;
     }
+  }
+
+  async sendAppointmentConfirmation(
+    to: string,
+    record: AppointmentComfirmation,
+  ) {
+    try {
+      await this.mailerService.sendMail({
+        to,
+        subject: 'Xác Nhận Đặt Lịch Hẹn',
+        template: './appointment_confirmation',
+        context: {
+          ...record,
+          service: {
+            ...record.service,
+            price: this.formatCurrency(record.service.price),
+          },
+        },
+      });
+      console.log('Email sent successfully');
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      throw error;
+    }
+  }
+
+  public formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(amount);
   }
 }

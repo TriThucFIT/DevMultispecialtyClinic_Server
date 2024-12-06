@@ -192,7 +192,7 @@ export class MedicationService {
             ? new Date(medicalRecordEntry.visitDate).toLocaleDateString('vi-VN')
             : '',
           prescriptions: presToMail,
-          totalAmountPrescriptions: this.formatCurrency(
+          totalAmountPrescriptions: this.mailService.formatCurrency(
             resultUpdate.reduce(
               (acc, cur) =>
                 acc +
@@ -206,10 +206,10 @@ export class MedicationService {
           labRequests: medicalRecordEntry?.labRequests?.map((lab) => ({
             name: lab.labTest.name,
             result: lab.testResult.result,
-            price: this.formatCurrency(lab.labTest.price),
+            price: this.mailService.formatCurrency(lab.labTest.price),
             notes: lab.testResult.notes,
           })),
-          totalAmountLabTests: this.formatCurrency(
+          totalAmountLabTests: this.mailService.formatCurrency(
             medicalRecordEntry?.labRequests?.reduce(
               (acc, cur) => acc + cur.labTest.price,
               0,
@@ -224,10 +224,5 @@ export class MedicationService {
     return resultUpdate;
   }
 
-  private formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(amount);
-  }
+
 }

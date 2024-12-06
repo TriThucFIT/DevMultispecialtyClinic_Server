@@ -7,6 +7,7 @@ import { DoctorModule } from 'src/DoctorModule/doctor.module';
 import { PatientModule } from 'src/PatientModule/patient.module';
 import { AppointmentRepository } from './repositories/appointment.repository';
 import { CasherModule } from 'src/CasherModule/casher.module';
+import { MailerCustomModule } from 'src/MailerModule/MailerModule.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CasherModule } from 'src/CasherModule/casher.module';
     DoctorModule,
     PatientModule,
     CasherModule,
+    MailerCustomModule
   ],
   providers: [AppointmentService, AppointmentRepository],
   controllers: [AppointmentController],
