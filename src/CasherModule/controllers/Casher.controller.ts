@@ -19,13 +19,11 @@ import { Roles } from 'src/Decorators/roles.decorator';
 import { Action, Resource, RoleName } from 'src/Common/Enums/auth.enum';
 import { Permissions } from 'src/Decorators/permissions.decorator';
 import { HttpExceptionFilter } from 'src/Common/DTO/HandleException';
-import { ApiTags } from '@nestjs/swagger';
 import { InvoiceResponseDTO, InvoiceUpdateItemsRequest, PayInvoiceRequest } from '../types/invoice';
 import { ApiResponseDto } from 'src/Common/DTO/ApiResponse.dto';
 import { CasherService } from '../casher.service';
 
 @Controller('casher')
-@ApiTags('casher')
 @UseInterceptors(ClassSerializerInterceptor)
 @UseFilters(HttpExceptionFilter)
 export class CasherController {

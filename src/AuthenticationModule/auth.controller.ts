@@ -23,20 +23,11 @@ import {
   SignInDto,
 } from './dto/auth.request.dto';
 import { log } from 'console';
-import {
-  ApiBadRequestResponse,
-  ApiCreatedResponse,
-  ApiInternalServerErrorResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+
 import { HttpExceptionFilter } from 'src/Common/DTO/HandleException';
 import { ApiResponseDto, ErrorDto } from 'src/Common/DTO/ApiResponse.dto';
-import { UserProfileDTO } from './dto/auth.response.dto';
 import { Role } from './entities/role.entity';
 
-@ApiTags('auth')
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
 @UseFilters(HttpExceptionFilter)
@@ -101,32 +92,14 @@ export class AuthController {
   }
 
   @Get('profile')
-  @ApiOkResponse({
-    type: ApiResponseDto<UserProfileDTO>,
-    description: 'Get user profile successfully',
-  })
-  @ApiNotFoundResponse({
-    type: ApiResponseDto<ErrorDto>,
-    description: 'User not found',
-  })
   getProfile(@Request() req: any) {
+    console.log('Get profile', req.user);
     return this.authService.getProfile(req.user.username);
   }
 
   @Roles(RoleName.Admin)
   @Permissions([{ resource: Resource.Role, actions: [Action.Create] }])
   @Post('role')
-  @ApiCreatedResponse({
-    type: ApiResponseDto<Role>,
-    description: 'Role created successfully',
-  })
-  @ApiBadRequestResponse({
-    type: ApiResponseDto<ErrorDto>,
-    description: 'Bad Request',
-  })
-  @ApiInternalServerErrorResponse({
-    type: ApiResponseDto<ErrorDto>,
-  })
   async createRole(@Body() createRoleDto: CreateRoleDto) {
     try {
       if (!createRoleDto.name) throw new Error('Role name is required');
