@@ -28,6 +28,9 @@ import {
   MedicalRecordCreation,
   MedicalRecordEntryCreation,
 } from 'src/PatientModule/dto/patient.dto';
+import { ItemType } from '../enums/itemType.enum';
+import { PrescriptionSendToQueue } from 'src/PharmacistModule/types/Pharmacist.type';
+import { PrescriptionStatus } from 'src/PharmacistModule/enums';
 
 @Injectable()
 export class InvoiceService {
@@ -144,6 +147,7 @@ export class InvoiceService {
           'medicalRecordEntry',
           'medicalRecordEntry.medicalRecord',
           'medicalRecordEntry.labRequests',
+          'medicalRecordEntry.doctor',
         ],
       });
       log('invoice before pay', invoice.medicalRecordEntry);
@@ -204,9 +208,6 @@ export class InvoiceService {
       invoice.checkStatus();
 
       await this.invoiceRepository.save(invoice);
-
-      log('invoice after pay', invoice);
-
       if (!invoice.medicalRecordEntry) {
         const record: MedicalRecordCreation = {
           patient: invoice.patient,
@@ -221,13 +222,8 @@ export class InvoiceService {
           doctorId: payInvoice.patient.admission.doctor_id,
           invoice: invoice,
         };
-
-        log('add new entry medical_record', recordEntry);
-
         this.medicalRecordService.createRecordEntry(recordEntry);
       }
-      log('PayInvoiceRequest', payInvoice);
-      log('PayInvoiceRequest', payInvoice.patient)
 
       const sendData: Partial<PatientSendToQueue> = {
         id: payInvoice.patient.id,
@@ -257,6 +253,29 @@ export class InvoiceService {
 
       if (payInvoice.patient.admission.service === 'EMERGENCY') {
         queueName = 'emergency';
+      } else if (
+        invoice.invoiceItems.some(
+          (item) => item.itemType === ItemType.PRESCRIPTION,
+        )
+      ) {
+        queueName = 'pharmacist_general';
+        const prescriptionSendQueue: PrescriptionSendToQueue = {
+          medicalRecordEntryId: invoice.medicalRecordEntry.id,
+          patient: {
+            id: payInvoice.patient.id,
+            name: payInvoice.patient.fullName,
+            phone: payInvoice.patient.phone,
+            dob: payInvoice.patient.dob.toString(),
+            priority: payInvoice.patient.priority,
+          },
+          doctor: invoice.medicalRecordEntry.doctor.fullName,
+          status: PrescriptionStatus.PENDING,
+        };
+        this.activeMqService.sendMessage(
+          queueName,
+          JSON.stringify(prescriptionSendQueue),
+        );
+        return invoice;
       } else {
         queueName =
           payInvoice.patient.admission.specialization + '_specialization';
@@ -279,7 +298,12 @@ export class InvoiceService {
   ): Promise<InvoiceResponseDTO> {
     const invoice = await this.invoiceRepository.findOne({
       where: { id: invoiceUpdate.invoice_id },
-      relations: ['invoiceItems', 'medicalRecordEntry', 'patient', 'medicalRecordEntry.doctor.specialization'],
+      relations: [
+        'invoiceItems',
+        'medicalRecordEntry',
+        'patient',
+        'medicalRecordEntry.doctor.specialization',
+      ],
     });
 
     if (!invoice) {
@@ -301,29 +325,13 @@ export class InvoiceService {
         return await this.invoiceItemRepository.save(newItem);
       }),
     );
-
     invoice.invoiceItems = [...invoice.invoiceItems, ...newItems];
-
-    log(
-      'invoice.invoiceItems after update',
-      invoice.invoiceItems.map((i) => {
-        return {
-          name: i.name,
-          itemType: i.itemType,
-        };
-      }),
-    );
-
     invoice.calculateTotalAmount();
     invoice.calculateTotalPaid();
     invoice.calculateStatus();
-    invoice.checkStatus()
+    invoice.checkStatus();
 
     const updateInvoice = await this.invoiceRepository.save(invoice);
-
-    console.log("InvoiceService -> addInvoiceItem -> updateInvoice", invoice.medicalRecordEntry);
-    console.log("InvoiceService -> addInvoiceItem -> updateInvoice", invoice.medicalRecordEntry.doctor);
-    
 
     const patientToQueue: Partial<PatientSendToQueue> = {
       id: invoice.patient.patientId,
@@ -340,7 +348,8 @@ export class InvoiceService {
       currentRecord: { id: invoice.medicalRecordEntry.id },
       admission: {
         doctor_id: invoice.medicalRecordEntry.doctor?.employeeId,
-        specialization: invoice.medicalRecordEntry.doctor?.specialization.specialization_id,
+        specialization:
+          invoice.medicalRecordEntry.doctor?.specialization.specialization_id,
       },
     };
 

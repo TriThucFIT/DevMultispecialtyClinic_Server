@@ -13,9 +13,11 @@ import { LabTestModule } from './LabTestModule/labTest.module';
 import { PharmacistModule } from './PharmacistModule/pharmacist.module';
 import { dataSourceOptions } from './Database/data-source';
 import { AuthModule } from './AuthenticationModule/auth.module';
+import { MailerCustomModule } from './MailerModule/MailerModule.module';
 
 @Module({
   imports: [
+    MailerCustomModule,
     ActiveMQModule,
     AppointmentModule,
     PatientModule,

@@ -23,6 +23,7 @@ import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CasherService } from 'src/CasherModule/casher.service';
 import { PatientService } from 'src/PatientModule/services/patient.service';
+import { PharmacistService } from 'src/PharmacistModule/services/pharmacist.service';
 
 @Injectable()
 export class AuthService {
@@ -36,6 +37,7 @@ export class AuthService {
     private receptionistService: ReceptionistService,
     private casherService: CasherService,
     private patientService: PatientService,
+    private pharmacistService: PharmacistService,
   ) {}
 
   async signIn(signInRequest: SignInDto) {
@@ -93,6 +95,13 @@ export class AuthService {
 
         case RoleName.Casher:
           await this.casherService.create({
+            ...createUserDto.entity,
+            account: user,
+          });
+          break;
+
+        case RoleName.Pharmacist:
+          await this.pharmacistService.createPharmacist({
             ...createUserDto.entity,
             account: user,
           });
@@ -267,6 +276,14 @@ export class AuthService {
         return UserProfileDTO.plainToInstance({
           ...accountResponse,
           ...patient,
+        });
+      case RoleName.Pharmacist:
+        const pharmacist = await this.pharmacistService.findByAccount(
+          account.id,
+        );
+        return UserProfileDTO.plainToInstance({
+          ...accountResponse,
+          ...pharmacist,
         });
       default:
         return UserProfileDTO.plainToInstance(accountResponse);

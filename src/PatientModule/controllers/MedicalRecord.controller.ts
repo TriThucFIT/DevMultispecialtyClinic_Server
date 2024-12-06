@@ -11,13 +11,13 @@ import { MedicalRecordService } from '../services/MedicalRecod.service';
 import {
   MedicalRecordCreation,
   MedicalRecordEntryCreation,
+  MedicalRecordEntryResponseDto,
   MedicalRecordEntryUpdate,
   MedicalRecordResponseDto,
 } from '../dto/patient.dto';
 import { ApiResponseDto } from 'src/Common/DTO/ApiResponse.dto';
 import { InsertValuesMissingError } from 'typeorm';
 import { plainToClass } from 'class-transformer';
-import { log } from 'console';
 
 @Controller('medical-record')
 export class MedicalRecordController {
@@ -70,6 +70,21 @@ export class MedicalRecordController {
     } else {
       throw new InsertValuesMissingError();
     }
+  }
+
+  @Get('/medical-record-entry/:entryId')
+  async getMedicalRecordEntry(
+    @Param('entryId') entryId: number,
+  ): Promise<ApiResponseDto<MedicalRecordEntryResponseDto>> {
+    const recordEntry =
+      await this.medicalRecordService.findRecordEntry(entryId);
+    return {
+      data: plainToClass(MedicalRecordEntryResponseDto, recordEntry, {
+        excludeExtraneousValues: true,
+      }),
+      message: 'Success',
+      statusCode: 200,
+    };
   }
 
   @Post()

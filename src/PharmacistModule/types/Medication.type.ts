@@ -1,6 +1,12 @@
 import { Expose, Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, ValidateNested } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsNotEmpty,
+  IsNumber,
+  ValidateNested,
+} from 'class-validator';
 import { BaseDTO } from 'src/Common/BaseDTO';
+import { PrescriptionStatus } from '../enums';
 
 export class MedicationCreateDto {
   @IsNotEmpty()
@@ -73,9 +79,20 @@ export class PrescriptionResponseDto extends BaseDTO {
 export class PrescriptionDto {
   @IsNotEmpty()
   medicalRecordId: number;
+  @IsNotEmpty()
+  doctorId: string;
   note: string;
   @IsNotEmpty()
   @Type(() => PrescriptionMedicationDto)
   @ValidateNested({ each: true })
   medications: PrescriptionMedicationDto[];
+}
+
+export class PrescriptionUpdateDto {
+  @IsNotEmpty()
+  id: number;
+  @IsNotEmpty()
+  status: PrescriptionStatus;
+  @IsNotEmpty()
+  medicalRecordEntryId: number;
 }

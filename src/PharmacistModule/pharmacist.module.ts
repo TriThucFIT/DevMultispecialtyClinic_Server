@@ -11,6 +11,7 @@ import { DoctorModule } from 'src/DoctorModule/doctor.module';
 import { PatientModule } from 'src/PatientModule/patient.module';
 import { MedicationController } from './controllers/Medication.controller';
 import { MedicationService } from './services/Medication.service';
+import { MailerCustomModule } from 'src/MailerModule/MailerModule.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { MedicationService } from './services/Medication.service';
     CasherModule,
     DoctorModule,
     PatientModule,
+    MailerCustomModule
   ],
   providers: [
     PharmacistService,

@@ -7,6 +7,7 @@ import {
   PrescriptionDto,
   PrescriptionMedicationDto,
   PrescriptionResponseDto,
+  PrescriptionUpdateDto,
 } from '../types';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrescriptionMedication } from '../entities/prescriptionMedication.entity';
@@ -15,6 +16,11 @@ import { PrescriptionStatus } from '../enums';
 import { InvoiceService } from 'src/CasherModule/services/Invoice.service';
 import { ItemType } from 'src/CasherModule/enums/itemType.enum';
 import { MedicalRecordService } from 'src/PatientModule/services/MedicalRecod.service';
+import { DoctorService } from 'src/DoctorModule/doctor.service';
+import { CustomMailerService } from 'src/MailerModule/MailerModule.service';
+import { MedicalRecordSumary, MedicationToMail } from 'src/MailerModule/types';
+import { MedicalRecordEntry } from 'src/PatientModule/entities/MedicalRecordEntry.entity';
+import { log } from 'console';
 
 @Injectable()
 export class MedicationService {
@@ -27,6 +33,8 @@ export class MedicationService {
     private readonly prescriptionRepository: Repository<Prescription>,
     private readonly invoiceService: InvoiceService,
     private readonly medicalRecordService: MedicalRecordService,
+    private readonly doctorService: DoctorService,
+    private readonly mailService: CustomMailerService,
   ) {}
 
   async createMedication(
@@ -65,6 +73,16 @@ export class MedicationService {
 
     if (!medicalRecordEntry) {
       throw new NotFoundException('Không tìm thấy hồ sơ bệnh án');
+    }
+    if (!medicalRecordEntry.doctor) {
+      const doctor = await this.doctorService.findByEmployeeId(
+        prescription.doctorId,
+      );
+      if (!doctor) {
+        throw new NotFoundException('Không tìm thấy bác sĩ');
+      }
+      medicalRecordEntry.doctor = doctor;
+      await this.medicalRecordService.saveRecordEntry(medicalRecordEntry);
     }
 
     let pres = this.prescriptionRepository.create();
@@ -122,5 +140,94 @@ export class MedicationService {
     return await this.prescriptionRepository.find({
       relations: ['medications', 'medications.medication'],
     });
+  }
+
+  async updatePrescriptionStatus(
+    prescriptions: PrescriptionUpdateDto[],
+  ): Promise<PrescriptionResponseDto[]> {
+    let medicalRecordEntry: MedicalRecordEntry | null = null;
+    let presToMail: MedicationToMail[] = [];
+    const updatedPrescriptions = prescriptions.map(async (prescription) => {
+      const pres = await this.prescriptionRepository.findOne({
+        where: { id: prescription.id },
+        relations: [
+          'medications',
+          'medications.medication',
+          'medicalRecordEntry.doctor',
+          'medicalRecordEntry.labRequests.labTest',
+          'medicalRecordEntry.labRequests.testResult',
+          'medicalRecordEntry.medicalRecord.patient.account',
+        ],
+      });
+      if (!pres) {
+        throw new NotFoundException('Không tìm thấy đơn thuốc');
+      }
+
+      if (pres.medicalRecordEntry) {
+        medicalRecordEntry = pres.medicalRecordEntry;
+      }
+      pres.status = prescription.status;
+      pres.medications.forEach((med) => {
+        presToMail.push({
+          name: med.medication.name,
+          dosage: med.medication.dosage,
+          unitStock: med.medication.unitStock,
+          quantity: med.quantity,
+          usage: med.medication.usage,
+          note: med.note,
+        });
+      });
+      return this.prescriptionRepository.save(pres);
+    });
+    const resultUpdate = await Promise.all(updatedPrescriptions);
+    if (resultUpdate && medicalRecordEntry) {
+      const toMail = medicalRecordEntry?.medicalRecord?.patient?.account?.email;
+      if (toMail) {
+        const recordSumary: MedicalRecordSumary = {
+          diagnosis: medicalRecordEntry.diagnosis,
+          note: medicalRecordEntry.note,
+          symptoms: medicalRecordEntry.symptoms,
+          treatmentPlan: medicalRecordEntry.treatmentPlan,
+          visitDate: medicalRecordEntry.visitDate
+            ? new Date(medicalRecordEntry.visitDate).toLocaleDateString('vi-VN')
+            : '',
+          prescriptions: presToMail,
+          totalAmountPrescriptions: this.formatCurrency(
+            resultUpdate.reduce(
+              (acc, cur) =>
+                acc +
+                cur.medications.reduce(
+                  (acc, cur) => acc + cur.medication.unitPrice * cur.quantity,
+                  0,
+                ),
+              0,
+            ),
+          ),
+          labRequests: medicalRecordEntry?.labRequests?.map((lab) => ({
+            name: lab.labTest.name,
+            result: lab.testResult.result,
+            price: this.formatCurrency(lab.labTest.price),
+            notes: lab.testResult.notes,
+          })),
+          totalAmountLabTests: this.formatCurrency(
+            medicalRecordEntry?.labRequests?.reduce(
+              (acc, cur) => acc + cur.labTest.price,
+              0,
+            ),
+          ),
+          doctorName: medicalRecordEntry?.doctor?.fullName,
+          doctorPhone: medicalRecordEntry?.doctor?.phone,
+        };
+        await this.mailService.sendMedicalSummary(toMail, recordSumary);
+      }
+    }
+    return resultUpdate;
+  }
+
+  private formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(amount);
   }
 }
