@@ -9,7 +9,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "postbuild": "npm run copy-templates",
     "start": "nest build && npm run copy-templates && nest start",
-    "start:dev": "nest build && npm run copy-templates && nest start --watch",
+    "start:dev": "nest build && npm run copy-templates && nest start --watch && npm run copy-templates",
     "start:debug": "nest build && npm run copy-templates && nest start --debug --watch",
     "start:prod": "node dist/main",
     "copy-templates": "xcopy src\\templates dist\\templates /E /I /Y",
