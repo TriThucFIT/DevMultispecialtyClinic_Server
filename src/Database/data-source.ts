@@ -17,6 +17,9 @@ export const dataSourceOptions: DataSourceOptions = {
   logging: false,
 };
 
+console.log("Configuring", process.env.DB_HOST, "database connection");
+console.log("Configuring data source with options: ", dataSourceOptions);
+
 const dataSource = new DataSource(dataSourceOptions);
 
 export default dataSource;
