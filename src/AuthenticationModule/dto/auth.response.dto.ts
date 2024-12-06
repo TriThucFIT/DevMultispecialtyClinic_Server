@@ -12,6 +12,8 @@ export class SpecializationDTO {
 
 export class UserProfileDTO extends BaseDTO {
   @Expose()
+  patientId?: string;
+  @Expose()
   email?: string;
   @Expose()
   employeeId?: string;
@@ -54,3 +56,4 @@ export class PermissionResponseDto extends BaseDTO {
   @Expose()
   action: Action[];
 }
+

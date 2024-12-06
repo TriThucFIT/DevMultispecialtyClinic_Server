@@ -32,6 +32,8 @@ export type MedicalRecordEntryCreation = {
 
 export class PatientCreationDto extends UserCreationDTO {
   @Expose()
+  patientId?: string;
+  @Expose()
   priority: number;
 }
 export class PatientUpdateDto extends UserCreationDTO {}
@@ -55,6 +57,8 @@ export class PatientResponseDto extends BaseDTO {
   dob: Date;
   @Expose()
   gender: boolean;
+  @Expose()
+  accountId?: string;
 }
 
 export class MedicalInformationResponseDto extends BaseDTO {

@@ -4,6 +4,7 @@ import { RoleName } from 'src/Common/Enums/auth.enum';
 import { ReceptionistCreationDto } from 'src/ReceptionistModule/dto/receptionist.request.dto';
 import { Role } from '../entities/role.entity';
 import { Permission } from '../entities/permission.entity';
+import { PatientCreationDto } from 'src/PatientModule/dto/patient.dto';
 
 export class SignInDto {
   @IsNotEmpty({
@@ -38,6 +39,16 @@ export class CreateAccountDto {
   readonly roles?: (RoleName | number | Role)[];
   readonly department?: RoleName;
   readonly entity?: DoctorCreationDto | ReceptionistCreationDto | any;
+}
+
+export class CreatePatientAccountDto {
+  @IsNotEmpty()
+  readonly username: string;
+  readonly email?: string;
+  @IsNotEmpty()
+  readonly password: string;
+  patient: PatientCreationDto;
+  roles: RoleName[];
 }
 
 export class CreateRoleDto {

@@ -62,4 +62,10 @@ export class PatientController {
       statusCode: 200,
     };
   }
+
+  @Public()
+  @Get('findByPhone/:phone')
+  async findByPhone(@Param('phone') phone: string) {
+    return await this.service.findByPhone(phone);
+  }
 }
