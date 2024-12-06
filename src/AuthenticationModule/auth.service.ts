@@ -58,6 +58,8 @@ export class AuthService {
     };
   }
   async createAccount(createUserDto: CreateAccountDto) {
+    console.log('createUserDto', createUserDto);
+
     try {
       if (!createUserDto.department) {
         throw new Error('Department is required');
@@ -78,6 +80,8 @@ export class AuthService {
       roles.forEach((role) => {
         this.userService.setRole(user.username, role);
       });
+
+      console.log('roles', roles);
 
       switch (createUserDto.department) {
         case RoleName.Doctor:
@@ -129,12 +133,14 @@ export class AuthService {
     this.userService.setRole(createPatientAccountDto.username, roles[0]);
 
     patient.account = account;
-    await this.patientService.update(patient.id, patient);
+    await this.patientService.updateAccount(patient.id, patient);
     return patient;
   }
 
   async checkUsernameExist(username: string) {
     const account = await this.userService.findOne(username);
+    console.log('account', account);
+
     if (account) {
       throw new BadRequestException({
         code: 400,
@@ -150,21 +156,20 @@ export class AuthService {
   async checkPatientId(patientId: string) {
     const patient = await this.patientService.findOne(patientId);
     const isValidPatientId = /^PAT\d{2,}$/.test(patientId);
+    console.log('patient', patient);
+
     if (!isValidPatientId) {
       throw new BadRequestException({
-        code: 400,
         message: 'Mã bệnh nhân không hợp lệ',
       });
     }
     if (!patient) {
       throw new NotFoundException({
-        code: 404,
         message: 'Mã bệnh nhân không tồn tại',
       });
     }
     if (patient.account) {
       throw new BadRequestException({
-        code: 400,
         message: 'Tài khoản đã tồn tại',
       });
     }

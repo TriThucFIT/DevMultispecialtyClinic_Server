@@ -155,14 +155,27 @@ export class PatientService {
       where: typeof id === 'string' ? { patientId: id } : { id },
       relations: ['account'],
     });
+    console.log('patientToUpdate', patientToUpdate);
+
     if (!patientToUpdate) {
       throw new NotFoundException('Không tìm thấy bệnh nhân');
     }
+
     return this.patientRepository.save({
       ...patientToUpdate,
       ...patient,
       account: { email: patient?.email ?? patientToUpdate.account?.email },
     });
+  }
+
+  async updateAccount(id: number | string, patient: PatientCreationDto) {
+    const patientToUpdate = await this.patientRepository.findOne({
+      where: typeof id === 'string' ? { patientId: id } : { id },
+    });
+    if (!patientToUpdate) {
+      throw new NotFoundException('Không tìm thấy bệnh nhân');
+    }
+    return this.patientRepository.save({ ...patientToUpdate, ...patient });
   }
 
   async updateByPhoneAndName(
