@@ -16,7 +16,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToClass } from 'class-transformer';
 import { InvoiceStatus } from '../enums/InvoiceStatus.enum';
-import { log, error } from 'console';
+import { error } from 'console';
 import { CasherService } from '../casher.service';
 import { ActiveMqService } from 'src/ActiveMQModule/activeMQ.service';
 import {
@@ -150,7 +150,6 @@ export class InvoiceService {
           'medicalRecordEntry.doctor',
         ],
       });
-      log('invoice before pay', invoice.medicalRecordEntry);
       if (!invoice) {
         throw new NotFoundException('Không tìm thấy hóa đơn');
       }

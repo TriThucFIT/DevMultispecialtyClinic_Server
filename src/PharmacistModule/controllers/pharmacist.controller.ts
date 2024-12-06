@@ -3,7 +3,6 @@ import { MedicationService } from '../services/Medication.service';
 import { ApiResponseDto } from 'src/Common/DTO/ApiResponse.dto';
 import { PrescriptionResponseDto, PrescriptionUpdateDto } from '../types';
 import { plainToClass } from 'class-transformer';
-import { log } from 'console';
 
 @Controller('pharmacist')
 export class PharmacistController {
@@ -13,7 +12,6 @@ export class PharmacistController {
   async updatePrescriptionStatus(
     @Body() prescriptions: PrescriptionUpdateDto[],
   ): Promise<ApiResponseDto<PrescriptionResponseDto[]>> {
-    log('Updating prescription status', prescriptions);
     return {
       data: plainToClass(
         PrescriptionResponseDto,

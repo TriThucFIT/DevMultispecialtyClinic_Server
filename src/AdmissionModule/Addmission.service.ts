@@ -54,7 +54,6 @@ export class AdmissionService {
       let patient: Patient;
       try {
         if (createAdmissionDto.patient) {
-          log('createAdmissionDto.patient', createAdmissionDto.patient);
           patient = await this.patientService.updateByPhoneAndName(
             createAdmissionDto.patient.phone,
             createAdmissionDto.patient.fullName,
@@ -203,7 +202,7 @@ export class AdmissionService {
       );
       return addmission;
     } catch (error) {
-      Logger.error(error);
+      console.error(error);
       throw error;
     }
   }
@@ -288,7 +287,6 @@ export class AdmissionService {
 
   async acceptEmergency(acceptEmergency: AcceptEmergency) {
     try {
-      log('acceptEmergency', acceptEmergency);
       const doctor = await this.doctorService.findByEmployeeId(
         acceptEmergency.doctor_id,
       );

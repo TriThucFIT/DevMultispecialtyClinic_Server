@@ -193,8 +193,6 @@ export class AppointmentService {
           await this.medicalRecordService.saveRecordEntry(medicalRecordEntry);
         }
       }
-      log(newAppointment);
-
       if (newAppointment.patient?.account?.email || appointment.patient.email) {
         const confirmation_mail: AppointmentComfirmation = {
           id: newAppointment.id,

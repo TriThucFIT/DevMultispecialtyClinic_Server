@@ -3,7 +3,6 @@ import { DoctorCreationDto, SpecializationCreationDTO } from './dto/doctor.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Doctor } from './entities/doctor.entity';
 import { Repository } from 'typeorm';
-import { log } from 'console';
 import { Specialization } from './entities/specialization.entity';
 
 @Injectable()

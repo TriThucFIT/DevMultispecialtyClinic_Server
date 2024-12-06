@@ -7,7 +7,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Patient } from '../entities/patient.entity';
 import { Like, Repository } from 'typeorm';
-import { log } from 'console';
 
 @Injectable()
 export class PatientService {
@@ -155,8 +154,6 @@ export class PatientService {
       where: typeof id === 'string' ? { patientId: id } : { id },
       relations: ['account'],
     });
-    console.log('patientToUpdate', patientToUpdate);
-
     if (!patientToUpdate) {
       throw new NotFoundException('Không tìm thấy bệnh nhân');
     }
@@ -183,7 +180,6 @@ export class PatientService {
     fullName: string,
     patient: PatientCreationDto,
   ) {
-    log('updateByPhoneAndName', patient);
     const patientToUpdate = await this.findByPhoneAndName(phone, fullName);
     if (!patientToUpdate) {
       throw new NotFoundException('Không tìm thấy bệnh nhân');

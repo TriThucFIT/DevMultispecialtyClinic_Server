@@ -20,8 +20,6 @@ import {
   TestResultResponseDto,
 } from './types/labRequest.type';
 import { TestResultCreationDto } from 'src/PatientModule/dto/patient.dto';
-import { log } from 'console';
-import { IsNotEmpty } from 'class-validator';
 
 @Controller('labTest')
 export class LabTestController {

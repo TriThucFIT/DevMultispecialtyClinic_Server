@@ -14,7 +14,6 @@ import { Casher } from './casher.entity';
 import { InvoiceItem } from './invoiceItem.entity';
 import { InvoiceStatus } from '../enums/InvoiceStatus.enum';
 import { PaymentMethod } from '../enums/itemType.enum';
-import { log } from 'console';
 import { MedicalRecordEntry } from 'src/PatientModule/entities/MedicalRecordEntry.entity';
 
 @Entity('invoice')
@@ -111,29 +110,18 @@ export class Invoice extends BaseClassProperties {
       0,
     );
 
-    log('total_amount into hook', this.total_amount);
   }
 
   @BeforeUpdate()
   @BeforeInsert()
   calculateTotalPaid() {
-    log(
-      'total_paid into hook',
-      this.invoiceItems.map((item) => {
-        log(
-          'calculateTotalPaid',
-          item.status === InvoiceStatus.PAID ? Number(item.amount) : 0,
-        );
-        return item.name;
-      }),
-    );
+    
     this.total_paid = this.invoiceItems.reduce(
       (total, item) =>
         total + item.status === InvoiceStatus.PAID ? Number(item.amount) : 0,
       0,
     );
 
-    log('total_paid into hook', this.total_paid);
   }
 
   // @BeforeUpdate()
@@ -144,7 +132,6 @@ export class Invoice extends BaseClassProperties {
         ? InvoiceStatus.PAID
         : InvoiceStatus.PENDING;
 
-    log('status into hook', this.status);
   }
 
   // @BeforeUpdate()
@@ -159,6 +146,5 @@ export class Invoice extends BaseClassProperties {
       this.status = InvoiceStatus.PENDING;
     }
 
-    log('status into hook', this.status);
   }
 }

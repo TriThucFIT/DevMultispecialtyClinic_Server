@@ -20,7 +20,6 @@ import { DoctorService } from 'src/DoctorModule/doctor.service';
 import { CustomMailerService } from 'src/MailerModule/MailerModule.service';
 import { MedicalRecordSumary, MedicationToMail } from 'src/MailerModule/types';
 import { MedicalRecordEntry } from 'src/PatientModule/entities/MedicalRecordEntry.entity';
-import { log } from 'console';
 
 @Injectable()
 export class MedicationService {

@@ -1,27 +1,23 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { LabTest } from './entities/LabTest.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PatientService } from 'src/PatientModule/services/patient.service';
 import { DoctorService } from 'src/DoctorModule/doctor.service';
 import { LabRequest } from './entities/LabRequest.entity';
 import { TestResult } from './entities/TestResult.entity';
-import { LabTestCategoryCreationDTO, LabTestCreationDTO } from './types';
+import { LabTestCreationDTO } from './types';
 import {
   LabRequestCreation,
   LabRequestResponseDto,
-  TestResultResponseDto,
 } from './types/labRequest.type';
 import { MedicalRecordService } from 'src/PatientModule/services/MedicalRecod.service';
 import { LabTestStatus } from './enums';
 import { TestResultCreationDto } from 'src/PatientModule/dto/patient.dto';
 import { LabTestCategory } from './entities/LabTestCategory.entity';
-import { log } from 'console';
 import { InvoiceService } from 'src/CasherModule/services/Invoice.service';
 import { ItemType } from 'src/CasherModule/enums/itemType.enum';
 import { GenerateTestResult } from './ultil/GenerateTestResult.ultil';
@@ -76,7 +72,6 @@ export class LabTestService {
         throw new NotFoundException('Không tìm thấy danh mục xét nghiệm');
       }
     } else {
-      log('Invalid category', LabTestCreation.category);
       throw new BadRequestException('Danh mục xét nghiệm không hợp lệ');
     }
 
@@ -109,7 +104,6 @@ export class LabTestService {
   async findResultOfLabRequest(
     labRequestId: number,
   ): Promise<Partial<LabRequestResponseDto>> {
-
     const labRequest = await this.labRequestRepository.findOne({
       where: { id: labRequestId },
       relations: ['testResult', 'labTest'],
