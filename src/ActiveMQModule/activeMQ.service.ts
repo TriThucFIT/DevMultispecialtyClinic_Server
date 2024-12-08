@@ -11,9 +11,9 @@ export class ActiveMqService implements OnModuleInit {
 
   private connect() {
     this.client = new Stomp.Client({
-      brokerURL: 'ws://localhost:61614/stomp',
+      brokerURL: process.env.ACTIVEMQ_HOST ?? 'ws://localhost:61614/stomp',
       webSocketFactory: () => {
-        return new WebSocket('ws://localhost:61614/stomp', 'stomp');
+        return new WebSocket(process.env.ACTIVEMQ_HOST ?? 'ws://localhost:61614/stomp', 'stomp');
       },
       reconnectDelay: 5000,
     });
