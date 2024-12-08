@@ -3,7 +3,7 @@ import { Appointment } from 'src/AppointmentModule/entities/appointment.entity';
 import { Employee } from 'src/AuthenticationModule/entities/employee.entity';
 import { Entity, OneToMany } from 'typeorm';
 
-@Entity('Receptionist')
+@Entity('receptionist')
 export class Receptionist extends Employee {
   constructor() {
     super();

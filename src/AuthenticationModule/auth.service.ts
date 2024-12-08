@@ -227,8 +227,6 @@ export class AuthService {
       });
     }
 
-    log('account', account);
-
     const accountResponse = {
       ...account,
       roles: account.roles.map((role) => ({
@@ -244,10 +242,8 @@ export class AuthService {
       case RoleName.Admin:
         return UserProfileDTO.plainToInstance(accountResponse);
       case RoleName.Doctor:
-        log('RoleName.Doctor', account.id);
         try {
           const doctor = await this.doctorService.findByAccount(account.id);
-          log('doctor', doctor);
           return UserProfileDTO.plainToInstance({
             ...accountResponse,
             ...doctor,
