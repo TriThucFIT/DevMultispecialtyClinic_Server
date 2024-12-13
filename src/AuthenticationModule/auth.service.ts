@@ -319,6 +319,27 @@ export class AuthService {
     }
   }
 
+  async resetPassword(
+    username: string,
+    old_password: string,
+    new_password: string,
+  ) {
+    const user = await this.userService.findOne(username);
+    if (!user) {
+      throw new NotFoundException({
+        message: 'Không tìm thấy tài khoản',
+      });
+    }
+    if (!(await user.comparePassword(old_password))) {
+      throw new UnauthorizedException({
+        message: 'Mật khẩu cũ không đúng',
+      });
+    }
+    user.password = new_password;
+    await this.userService.save(user);
+    return true;
+  }
+
   async forgotPassword(username: string) {
     const user = username.includes('@')
       ? await this.userService.findByEmail(username)

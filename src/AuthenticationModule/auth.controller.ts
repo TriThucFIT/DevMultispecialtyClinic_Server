@@ -116,7 +116,7 @@ export class AuthController {
   }
 
   @Public()
-  @Post('reset-password')
+  @Post('forgot-password')
   async resetPassword(
     @Body() query: { username: string },
   ): Promise<ApiResponseDto<{ result: boolean }>> {
@@ -128,7 +128,33 @@ export class AuthController {
       };
     } catch (error) {
       log('error', error);
-      throw new InternalServerErrorException(error.message);
+      throw error;
+    }
+  }
+
+  @Post('reset-password')
+  async resetPasswordWithToken(
+    @Body()
+    data: {
+      username: string;
+      old_password: string;
+      new_password: string;
+    },
+  ): Promise<ApiResponseDto<{ result: boolean }>> {
+    try {
+      return {
+        data: {
+          result: await this.authService.resetPassword(
+            data.username,
+            data.old_password,
+            data.new_password,
+          ),
+        },
+        message: 'Đặt lại mật khẩu thành công',
+        statusCode: 200,
+      };
+    } catch (error) {
+      throw error;
     }
   }
 }
