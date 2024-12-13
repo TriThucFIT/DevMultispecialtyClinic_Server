@@ -27,6 +27,7 @@ import { log } from 'console';
 import { HttpExceptionFilter } from 'src/Common/DTO/HandleException';
 import { ApiResponseDto, ErrorDto } from 'src/Common/DTO/ApiResponse.dto';
 import { Role } from './entities/role.entity';
+import { query } from 'express';
 
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -107,6 +108,23 @@ export class AuthController {
       return {
         message: 'Role created successfully',
         data: role,
+      };
+    } catch (error) {
+      log('error', error);
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  @Public()
+  @Post('reset-password')
+  async resetPassword(
+    @Body() query: { username: string },
+  ): Promise<ApiResponseDto<{ result: boolean }>> {
+    try {
+      return {
+        data: { result: await this.authService.forgotPassword(query.username) },
+        message: 'Đã gửi email xác nhận đặt lại mật khẩu',
+        statusCode: 200,
       };
     } catch (error) {
       log('error', error);

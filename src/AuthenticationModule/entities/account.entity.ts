@@ -1,4 +1,11 @@
-import { Entity, Column, ManyToMany, JoinTable, BeforeInsert } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToMany,
+  JoinTable,
+  BeforeInsert,
+  BeforeUpdate,
+} from 'typeorm';
 import { Role } from './role.entity';
 import { BaseClassProperties } from 'src/Common/BaseClassProperties';
 import * as bcrypt from 'bcrypt';
@@ -40,9 +47,11 @@ export class Account extends BaseClassProperties {
   }
 
   @BeforeInsert()
+  @BeforeUpdate()
   async hashPassword() {
     const salt = await bcrypt.genSalt();
     this.password = await bcrypt.hash(this.password, salt);
+    console.log('password hashed', this.password);
   }
 
   async comparePassword(attempt: string): Promise<boolean> {

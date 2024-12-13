@@ -63,6 +63,24 @@ export class CustomMailerService {
     }
   }
 
+  async sendResetPasswordEmail(
+    to: string,
+    data: { name: string; temporaryPassword: string },
+  ) {
+    try {
+      await this.mailerService.sendMail({
+        to,
+        subject: 'Xác Nhận Đặt Lại Mật Khẩu',
+        template: './reset_password',
+        context: data,
+      });
+      console.log('Email sent successfully');
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      throw error;
+    }
+  }
+
   public formatCurrency(amount: number): string {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',

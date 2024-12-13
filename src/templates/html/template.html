@@ -1,0 +1,84 @@
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xác nhận Đặt lại Mật khẩu</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+      }
+      .container {
+        width: 90%;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+      }
+      .header {
+        text-align: center;
+        background-color: #007bff;
+        color: #fff;
+        padding: 15px 0;
+        border-radius: 8px 8px 0 0;
+      }
+      .section {
+        margin-top: 20px;
+      }
+      .section h2 {
+        margin-bottom: 10px;
+        color: #007bff;
+      }
+      .section-content p {
+        margin: 5px 0;
+      }
+      .temp-password {
+        font-size: 20px;
+        font-weight: bold;
+        color: #d9534f;
+        text-align: center;
+        margin: 20px 0;
+        padding: 10px;
+        border: 1px dashed #d9534f;
+        background-color: #fff5f5;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Phòng Khám Đa Khoa DMC</h1>
+      </div>
+      <div class="section">
+        <h2>Xin chào, {{name}}!</h2>
+        <p>
+          Bạn vừa yêu cầu đặt lại mật khẩu cho tài khoản tại Phòng Khám Đa Khoa
+          DMC.
+        </p>
+        <p>
+          Đây là mật khẩu tạm thời của bạn. Vui lòng sử dụng mật khẩu này để
+          đăng nhập vào hệ thống và đổi mật khẩu mới ngay sau khi đăng nhập:
+        </p>
+        <div class="temp-password">{{temporaryPassword}}</div>
+        <p>
+          Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này hoặc
+          liên hệ với chúng tôi để được hỗ trợ.
+        </p>
+      </div>
+      <div class="section">
+        <p style="text-align: center; font-weight: bold">
+          Xin cảm ơn quý khách đã tin tưởng sử dụng dịch vụ của chúng tôi!
+        </p>
+        <p style="text-align: center; font-weight: lighter; font-style: italic">
+          Mọi thắc mắc vui lòng liên hệ với chúng tôi qua email:
+          <a href="mailto:support@dmclinic.vn">dmclinic@gmail.vn</a> hoặc
+          hotline: <strong>0963015348</strong>.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

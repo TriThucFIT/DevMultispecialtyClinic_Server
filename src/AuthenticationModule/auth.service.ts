@@ -24,6 +24,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CasherService } from 'src/CasherModule/casher.service';
 import { PatientService } from 'src/PatientModule/services/patient.service';
 import { PharmacistService } from 'src/PharmacistModule/services/pharmacist.service';
+import { CustomMailerService } from 'src/MailerModule/MailerModule.service';
 
 @Injectable()
 export class AuthService {
@@ -38,6 +39,7 @@ export class AuthService {
     private casherService: CasherService,
     private patientService: PatientService,
     private pharmacistService: PharmacistService,
+    private mailService: CustomMailerService,
   ) {}
 
   async signIn(signInRequest: SignInDto) {
@@ -315,5 +317,33 @@ export class AuthService {
     } catch (error) {
       throw new Error(error);
     }
+  }
+
+  async forgotPassword(username: string) {
+    const user = username.includes('@')
+      ? await this.userService.findByEmail(username)
+      : await this.userService.findOne(username);
+    if (!user) {
+      throw new NotFoundException({
+        message: 'Không tìm thấy tài khoản',
+      });
+    } else if (user.email === null) {
+      throw new NotFoundException({
+        message: 'Tài khoản không có email liên kết',
+      });
+    }
+
+    const tempPass = this.generateTempPassword();
+    user.password = tempPass;
+    await this.userService.save(user);
+    await this.mailService.sendResetPasswordEmail(user.email, {
+      name: user.username,
+      temporaryPassword: tempPass,
+    });
+    return true;
+  }
+
+  private generateTempPassword() {
+    return Math.random().toString(36).slice(-8);
   }
 }

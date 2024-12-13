@@ -18,6 +18,7 @@ import { PatientModule } from 'src/PatientModule/patient.module';
 import { ReceptionistModule } from 'src/ReceptionistModule/receptionist.module';
 import { CasherModule } from 'src/CasherModule/casher.module';
 import { PharmacistModule } from 'src/PharmacistModule/pharmacist.module';
+import { MailerCustomModule } from 'src/MailerModule/MailerModule.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { PharmacistModule } from 'src/PharmacistModule/pharmacist.module';
     ReceptionistModule,
     CasherModule,
     PharmacistModule,
+    MailerCustomModule,
     TypeOrmModule.forFeature([Account, Role, Permission]),
   ],
   providers: [
