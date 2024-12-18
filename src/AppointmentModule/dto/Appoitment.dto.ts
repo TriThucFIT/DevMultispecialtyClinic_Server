@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer';
-import { IsString, Matches, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsString, Matches, ValidateNested } from 'class-validator';
 import { DoctorAppointmentDto } from 'src/DoctorModule/dto/doctor.dto';
 import { PatientCreationDto } from 'src/PatientModule/dto/patient.dto';
 
@@ -19,6 +19,18 @@ export class CreateAppointmentDto {
   @Type(() => PatientCreationDto)
   patient: PatientCreationDto;
   medicalRecordEntryId?: number;
+}
+
+export class AvailableAppointmentParams {
+  @IsString()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'Định dạng ngày theo dạng YYYY-MM-DD',
+  })
+  date: string;
+  @IsNotEmpty({
+    message: 'Thiếu tham số Chuyên khoa'
+  })
+  specialization: string;
 }
 export class AppointmentResponseDto {
   @Expose()
@@ -41,4 +53,20 @@ export class AppointmentResponseDto {
   @Expose()
   @Type(() => DoctorAppointmentDto)
   doctor: DoctorAppointmentDto;
+}
+
+export class AvailableAppointments {
+  @Expose()
+  date: Date;
+  @Expose()
+  specialization: {
+    id: string;
+    name: string;
+  };
+  @Expose()
+  doctor: {
+    id: number;
+    name: string;
+    availableSlots: string[]; // HH:MM
+  }[];
 }

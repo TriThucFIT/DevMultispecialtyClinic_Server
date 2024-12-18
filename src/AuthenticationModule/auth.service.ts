@@ -125,15 +125,22 @@ export class AuthService {
 
   async createPatientAccount(createPatientAccountDto: CreatePatientAccountDto) {
     await this.checkUsernameExist(createPatientAccountDto.username);
-    const patient = await this.checkPatientId(
-      createPatientAccountDto.patient.patientId,
-    );
+    let patient = null;
 
     const roles = await this.roleService.findByNamesOrIds([RoleName.Patient]);
     createPatientAccountDto.roles = [RoleName.Patient];
     const account = await this.userService.create(createPatientAccountDto);
-
     this.userService.setRole(createPatientAccountDto.username, roles[0]);
+
+    if (createPatientAccountDto.patient.patientId) {
+      patient = await this.checkPatientId(
+        createPatientAccountDto.patient.patientId,
+      );
+    } else {
+      patient = await this.patientService.create({
+        ...createPatientAccountDto.patient,
+      });
+    }
 
     patient.account = account;
     await this.patientService.updateAccount(patient.id, patient);
@@ -146,12 +153,10 @@ export class AuthService {
 
     if (account) {
       throw new BadRequestException({
-        code: 400,
         message: 'Tên đăng nhập đã tồn tại',
       });
     }
     return {
-      code: 200,
       message: 'Tên đăng nhập hợp lệ',
     };
   }

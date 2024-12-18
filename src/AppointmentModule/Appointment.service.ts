@@ -7,7 +7,10 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateAppointmentDto } from './dto/Appoitment.dto';
+import {
+  AvailableAppointments,
+  CreateAppointmentDto,
+} from './dto/Appoitment.dto';
 import { Appointment } from './entities/appointment.entity';
 import { DoctorService } from 'src/DoctorModule/doctor.service';
 import { ServiceTypeService } from 'src/CasherModule/services/ServiceType.service';
@@ -80,10 +83,21 @@ export class AppointmentService {
     },
   };
 
-  async findByPatients(phone?: string, fullName?: string, email?: string) {
+  async findByPatients(
+    username?: string,
+    phone?: string,
+    fullName?: string,
+    email?: string,
+  ) {
     const queryClause = phone ? { phone } : fullName ? { fullName } : { email };
     const appointments = await this.appointmentRepository.find({
-      where: { patient: email ? { account: { email } } : queryClause },
+      where: {
+        patient: username
+          ? { account: { username } }
+          : email
+            ? { account: { email } }
+            : queryClause,
+      },
       relations: [
         'doctor',
         'service',
@@ -92,6 +106,7 @@ export class AppointmentService {
         'doctor.specialization',
       ],
       select: this.SelectAppointmentFields,
+      order: { date: 'DESC' },
     });
 
     return appointments.map((apm) => {
@@ -130,6 +145,87 @@ export class AppointmentService {
       delete reps.patient.account;
       return reps;
     });
+  }
+
+  async getAvailableAppointments(
+    date: Date,
+    specializationId: string,
+  ): Promise<AvailableAppointments> {
+    const doctors =
+      await this.doctorService.findBySpecialization(specializationId);
+
+    const doctorAvailableSlots = await Promise.all(
+      doctors.map(async (doctor) => {
+        const appointments = await this.appointmentRepository.find({
+          where: {
+            doctor: { id: doctor.id },
+            date,
+            status: AppointmentStatus.SCHEDULED,
+          },
+        });
+        log(
+          `Appointments of ${date} doctor is : ${doctor.fullName}`,
+          appointments,
+        );
+
+        const availableSlots = this.calculateAvailableTimes(appointments);
+        return {
+          id: doctor.id,
+          name: doctor.fullName,
+          availableSlots,
+        };
+      }),
+    );
+
+    return {
+      date,
+      specialization: {
+        id: specializationId,
+        name: doctors[0]?.specialization?.name || 'Unknown',
+      },
+      doctor: doctorAvailableSlots,
+    };
+  }
+
+  private calculateAvailableTimes(appointments: Appointment[]): string[] {
+    const workingHours = { start: '08:00', end: '20:00' };
+    const timeInterval = 30;
+    const maxAppointments = 10;
+
+    const takenTimesInMinutes = appointments.map((appt) =>
+      this.timeToMinutes(appt.time),
+    );
+
+    const availableTimes: string[] = [];
+    let currentTimeInMinutes = this.timeToMinutes(workingHours.start);
+    const endTimeInMinutes = this.timeToMinutes(workingHours.end);
+
+    while (currentTimeInMinutes < endTimeInMinutes) {
+      const isTimeAvailable =
+        takenTimesInMinutes.filter(
+          (takenTime) =>
+            Math.abs(currentTimeInMinutes - takenTime) < timeInterval,
+        ).length === 0;
+
+      if (isTimeAvailable && appointments.length < maxAppointments) {
+        availableTimes.push(this.minutesToTime(currentTimeInMinutes));
+      }
+
+      currentTimeInMinutes += timeInterval;
+    }
+
+    return availableTimes;
+  }
+
+  private timeToMinutes(time: string): number {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+  }
+
+  private minutesToTime(minutes: number): string {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
   }
 
   async create(appointment: CreateAppointmentDto) {
@@ -230,7 +326,9 @@ export class AppointmentService {
               : '',
             gender: newAppointment.patient?.gender,
             priority: newAppointment.patient?.priority,
-            email: newAppointment.patient?.account?.email ?? appointment.patient.email,
+            email:
+              newAppointment.patient?.account?.email ??
+              appointment.patient.email,
           },
         };
 
