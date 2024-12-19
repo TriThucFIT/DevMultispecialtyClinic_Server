@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer';
-import { IsNotEmpty, IsString, Matches, ValidateNested } from 'class-validator';
+import { IsEmpty, IsNotEmpty, IsString, Matches, ValidateNested } from 'class-validator';
 import { DoctorAppointmentDto } from 'src/DoctorModule/dto/doctor.dto';
 import { PatientCreationDto } from 'src/PatientModule/dto/patient.dto';
 
@@ -23,9 +23,9 @@ export class CreateAppointmentDto {
 
 export class AvailableAppointmentParams {
   @IsString()
-  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-    message: 'Định dạng ngày theo dạng YYYY-MM-DD',
-  })
+  // @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+  //   message: 'Định dạng ngày theo dạng YYYY-MM-DD',
+  // })
   date: string;
   @IsNotEmpty({
     message: 'Thiếu tham số Chuyên khoa'

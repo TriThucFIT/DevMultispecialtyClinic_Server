@@ -122,6 +122,7 @@ export class AppointmentService {
     });
   }
   async findByDate(date: Date) {
+    log('Date', date);
     const appointments = await this.appointmentRepository.find({
       where: { date },
       relations: [
@@ -154,8 +155,10 @@ export class AppointmentService {
     const doctors =
       await this.doctorService.findBySpecialization(specializationId);
 
+    log('Date', date, 'Specialization', specializationId);
     const doctorAvailableSlots = await Promise.all(
       doctors.map(async (doctor) => {
+        log('doctor', doctor.fullName, 'ID', doctor.id);
         const appointments = await this.appointmentRepository.find({
           where: {
             doctor: { id: doctor.id },
@@ -163,10 +166,6 @@ export class AppointmentService {
             status: AppointmentStatus.SCHEDULED,
           },
         });
-        log(
-          `Appointments of ${date} doctor is : ${doctor.fullName}`,
-          appointments,
-        );
 
         const availableSlots = this.calculateAvailableTimes(appointments);
         return {
