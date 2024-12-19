@@ -106,7 +106,12 @@ export class AppointmentService {
         'doctor.specialization',
       ],
       select: this.SelectAppointmentFields,
-      order: { date: 'DESC' },
+    });
+
+    appointments.sort((a, b) => {
+      const timeA = new Date(`1970-01-01T${a.time}Z`);
+      const timeB = new Date(`1970-01-01T${b.time}Z`);
+      return timeA.getTime() - timeB.getTime();
     });
 
     return appointments.map((apm) => {
@@ -122,7 +127,6 @@ export class AppointmentService {
     });
   }
   async findByDate(date: Date) {
-    log('Date', date);
     const appointments = await this.appointmentRepository.find({
       where: { date },
       relations: [
@@ -133,9 +137,11 @@ export class AppointmentService {
         'doctor.specialization',
       ],
       select: this.SelectAppointmentFields,
+      order: { time: 'ASC' },
     });
 
     return appointments.map((apm) => {
+      log(apm.time);
       const reps = {
         ...apm,
         patient: {
@@ -144,6 +150,7 @@ export class AppointmentService {
         },
       };
       delete reps.patient.account;
+
       return reps;
     });
   }

@@ -1,5 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
+import { log } from 'console';
 
 @Controller('doctor')
 export class DoctorController {
@@ -11,7 +12,8 @@ export class DoctorController {
   }
 
   @Get('/specialization/:specialization')
-  async getDoctorBySpecialization(specialization: string) {
+  async getDoctorBySpecialization(@Param('specialization') specialization: string) {
+    log(specialization);
     return this.DoctorService.findBySpecialization(specialization);
   }
   
