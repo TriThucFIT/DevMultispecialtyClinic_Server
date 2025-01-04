@@ -150,14 +150,17 @@ export class AuthService {
   async checkUsernameExist(username: string) {
     const account = await this.userService.findOne(username);
     console.log('account', account);
-
+    const patient = await this.patientService.findByAccount(account?.id);
     if (account) {
-      throw new BadRequestException({
+      return {
+        data: patient.phone,
         message: 'Tên đăng nhập đã tồn tại',
-      });
+        isExist: true,
+      };
     }
     return {
       message: 'Tên đăng nhập hợp lệ',
+      isExist: false,
     };
   }
 
@@ -366,6 +369,18 @@ export class AuthService {
       name: user.username,
       temporaryPassword: tempPass,
     });
+    return true;
+  }
+
+  async resetPasswordPatient(username: string, password: string) {
+    const user = await this.userService.findOne(username);
+    if (!user) {
+      throw new NotFoundException({
+        message: 'Không tìm thấy tài khoản',
+      });
+    }
+    user.password = password;
+    await this.userService.save(user);
     return true;
   }
 

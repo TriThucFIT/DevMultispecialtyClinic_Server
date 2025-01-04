@@ -23,11 +23,8 @@ import {
   SignInDto,
 } from './dto/auth.request.dto';
 import { log } from 'console';
-
 import { HttpExceptionFilter } from 'src/Common/DTO/HandleException';
-import { ApiResponseDto, ErrorDto } from 'src/Common/DTO/ApiResponse.dto';
-import { Role } from './entities/role.entity';
-import { query } from 'express';
+import { ApiResponseDto } from 'src/Common/DTO/ApiResponse.dto';
 
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -130,6 +127,23 @@ export class AuthController {
       log('error', error);
       throw error;
     }
+  }
+
+  @Public()
+  @Post('forgot-password-patient')
+  async resetPasswordPatient(
+    @Body() query: { username: string; password: string },
+  ): Promise<ApiResponseDto<{ result: boolean }>> {
+    return {
+      data: {
+        result: await this.authService.resetPasswordPatient(
+          query.username,
+          query.password,
+        ),
+      },
+      message: 'Thay đổi mật khẩu thành công',
+      statusCode: 200,
+    };
   }
 
   @Post('reset-password')
