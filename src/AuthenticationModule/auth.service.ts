@@ -147,6 +147,20 @@ export class AuthService {
     return patient;
   }
 
+  // async checkUsernameExist(username: string) {
+  //   const account = await this.userService.findOne(username);
+  //   console.log('account', account);
+
+  //   if (account) {
+  //     throw new BadRequestException({
+  //       message: 'Tên đăng nhập đã tồn tại',
+  //     });
+  //   }
+  //   return {
+  //     message: 'Tên đăng nhập hợp lệ',
+  //   };
+  // }
+
   async checkUsernameExist(username: string) {
     const account = await this.userService.findOne(username);
     console.log('account', account);

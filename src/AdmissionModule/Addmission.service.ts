@@ -219,10 +219,6 @@ export class AdmissionService {
       return 0;
     }
 
-    if (patient.seviceType === 'OVERTIME') {
-      return 1;
-    }
-
     const currentYear = new Date().getFullYear();
     const birthYear = new Date(patient.dob).getFullYear();
     const age = currentYear - birthYear;
@@ -230,7 +226,6 @@ export class AdmissionService {
     if (age >= 80) {
       return 2;
     }
-
     return 3;
   }
 

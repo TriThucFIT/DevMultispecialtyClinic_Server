@@ -106,7 +106,12 @@ export class AppointmentService {
         'doctor.specialization',
       ],
       select: this.SelectAppointmentFields,
-      order: { date: 'DESC' },
+    });
+
+    appointments.sort((a, b) => {
+      const timeA = new Date(`1970-01-01T${a.time}Z`);
+      const timeB = new Date(`1970-01-01T${b.time}Z`);
+      return timeA.getTime() - timeB.getTime();
     });
 
     return appointments.map((apm) => {
@@ -132,9 +137,11 @@ export class AppointmentService {
         'doctor.specialization',
       ],
       select: this.SelectAppointmentFields,
+      order: { time: 'ASC' },
     });
 
     return appointments.map((apm) => {
+      log(apm.time);
       const reps = {
         ...apm,
         patient: {
@@ -143,6 +150,7 @@ export class AppointmentService {
         },
       };
       delete reps.patient.account;
+
       return reps;
     });
   }
@@ -154,8 +162,10 @@ export class AppointmentService {
     const doctors =
       await this.doctorService.findBySpecialization(specializationId);
 
+    log('Date', date, 'Specialization', specializationId);
     const doctorAvailableSlots = await Promise.all(
       doctors.map(async (doctor) => {
+        log('doctor', doctor.fullName, 'ID', doctor.id);
         const appointments = await this.appointmentRepository.find({
           where: {
             doctor: { id: doctor.id },
@@ -163,10 +173,6 @@ export class AppointmentService {
             status: AppointmentStatus.SCHEDULED,
           },
         });
-        log(
-          `Appointments of ${date} doctor is : ${doctor.fullName}`,
-          appointments,
-        );
 
         const availableSlots = this.calculateAvailableTimes(appointments);
         return {
